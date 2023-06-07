@@ -4,17 +4,29 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>jfrog</groupId>
-    <artifactId>jfrog</artifactId>
+    <groupId>org.jfrog.bamboo</groupId>
+    <artifactId>bamboo-jfrog-plugin</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 
     <organization>
-        <name>Example Company</name>
-        <url>http://www.example.com/</url>
+        <name>JFrog Ltd</name>
+        <url>http://www.jfrog.com</url>
     </organization>
 
-    <name>jfrog</name>
-    <description>This is the jfrog:jfrog plugin for Atlassian Bamboo.</description>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>rjo</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <url>https://github.com/JFrogDev/bamboo-artifactory-plugin</url>
+        <connection>scm:git:git@github.com:JFrogDev/bamboo-artifactory-plugin.git</connection>
+    </scm>
+
+    <name>Bamboo JFrog Plugin</name>
+    <description>JFrog CLI plugin for Atlassian Bamboo.</description>
     <packaging>atlassian-plugin</packaging>
 
     <properties>
@@ -30,6 +42,32 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <buildinfo.version>2.37.2</buildinfo.version>
     </properties>
+
+    <profiles>
+        <profile>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <id>oss</id>
+            <repositories>
+                <repository>
+                    <id>oss-releases</id>
+                    <name>jfrog-dependencies</name>
+                    <url>https://releases.jfrog.io/artifactory/oss-releases</url>
+                </repository>
+                <repository>
+                    <id>atlassian-public</id>
+                    <url>https://maven.atlassian.com/repository/public</url>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>atlassian-public</id>
+                    <url>https://maven.atlassian.com/repository/public</url>
+                </pluginRepository>
+            </pluginRepositories>
+        </profile>
+    </profiles>
 
     <dependencies>
         <dependency>
