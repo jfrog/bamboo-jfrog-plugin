@@ -1,0 +1,29 @@
+<atlassian-plugin key="${atlassian.plugin.key}" name="${project.name}" plugins-version="2">
+    <plugin-info>
+        <description>${project.description}</description>
+        <version>${project.version}</version>
+        <vendor name="${project.organization.name}" url="${project.organization.url}" />
+        <param name="plugin-icon">images/pluginIcon.png</param>
+        <param name="plugin-logo">images/pluginLogo.png</param>
+    </plugin-info>
+
+    <!-- add our i18n resource -->
+    <resource type="i18n" name="i18n" location="jfrog"/>
+    
+    <!-- add our web resources -->
+    <web-resource key="jfrog-resources" name="jfrog Web Resources">
+        <dependency>com.atlassian.auiplugin:ajs</dependency>
+        
+        <resource type="download" name="jfrog.css" location="/css/jfrog.css"/>
+        <resource type="download" name="jfrog.js" location="/js/jfrog.js"/>
+        <resource type="download" name="images/" location="/images"/>
+
+        <context>jfrog</context>
+    </web-resource>
+
+    <taskType key="cliTask" name="CLI Task" class="org.jfrog.bamboo.CliTask">
+        <category name="deployment"/>
+        <description>A task that prints 'Hello, World!'</description>
+        <resource type="download" name="icon" location="/images/artifactory-icon.png"/>
+    </taskType>
+</atlassian-plugin>
