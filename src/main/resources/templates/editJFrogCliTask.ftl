@@ -10,7 +10,6 @@ label="JFrog Platform ServerID to use:"
 list=serverConfigManager.allServerConfigs
 listKey='id'
 listValue='url'
-emptyOption=true
 toggle='true'
 required='true'
 /]

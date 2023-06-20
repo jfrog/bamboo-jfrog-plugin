@@ -20,7 +20,11 @@
         <resource type="download" name="icon" location="/images/artifactory-icon.png"/>
     </taskType>
 
-
+    <postBuildCompletedAction
+            key="PostBuildAction"
+            class="org.jfrog.bamboo.PostBuildAction">
+        <description>Cleans up the temporary JFrog directory when the build is completed</description>
+    </postBuildCompletedAction>
 
     <!-- Admin Configurations -->
     <component name="Artifactory Server Configuration Management Component" key="artifactoryServerConfigManager"

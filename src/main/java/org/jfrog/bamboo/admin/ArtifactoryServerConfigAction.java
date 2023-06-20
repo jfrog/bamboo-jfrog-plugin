@@ -22,7 +22,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.jfrog.bamboo.security.EncryptionHelper;
+import org.jfrog.bamboo.utils.BuildLog;
+import org.jfrog.build.client.ArtifactoryVersion;
+import org.jfrog.build.extractor.clientConfiguration.ArtifactoryManagerBuilder;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -30,7 +33,7 @@ import java.net.URL;
 
 public class ArtifactoryServerConfigAction extends BambooActionSupport implements GlobalAdminSecurityAware {
 
-    private transient Logger log = LogManager.getLogger(ArtifactoryServerConfigAction.class);
+    private final transient Logger log = LogManager.getLogger(ArtifactoryServerConfigAction.class);
 
     private String mode;
     private long serverId;
@@ -40,8 +43,7 @@ public class ArtifactoryServerConfigAction extends BambooActionSupport implement
     private int timeout;
     private String isSendTest;
 
-
-    private transient ServerConfigManager serverConfigManager;
+    private final transient ServerConfigManager serverConfigManager;
 
     public ArtifactoryServerConfigAction(ServerConfigManager serverConfigManager) {
         this.serverConfigManager = serverConfigManager;
@@ -183,39 +185,21 @@ public class ArtifactoryServerConfigAction extends BambooActionSupport implement
     }
 
     private void testConnection() {
-        // ArtifactoryManagerBuilder managerBuilder;
-        // if (StringUtils.isNotBlank(username)) {
-            //     managerBuilder = TaskUtils.getArtifactoryManagerBuilderBuilder(new ServerConfig(serverId, url, username,
-                    //             password, timeout), new BuildInfoLog(log));
-            // } else {
-            //     managerBuilder = TaskUtils.getArtifactoryManagerBuilderBuilder(new ServerConfig(serverId, url,
-                    //             "", "", timeout), new BuildInfoLog(log));
-            // }
-        // try (ArtifactoryManager client = managerBuilder.build()) {
-            //     client.getVersion();
-            //     addActionMessage("Connection successful!");
-            // } catch (IllegalArgumentException iae) {
-            //     handleConnectionException(iae);
-            // } catch (IOException e) {
-            //     throw new RuntimeException(e);
-            // }
-    }
-
-    private void handleConnectionException(Exception e) {
-        Throwable throwable = e.getCause();
-        String errorMessage;
-        if (throwable != null) {
-            errorMessage = e.getMessage() + " (" + throwable.getClass().getCanonicalName() + ")";
-        } else {
-            errorMessage = e.getClass().getCanonicalName() + ": " + e.getMessage();
+        try (ArtifactoryManager manager = new ArtifactoryManager(url + "/artifactory", username, password, new BuildLog(log))) {
+            ArtifactoryVersion rtVersion = manager.getVersion();
+            if (rtVersion == null || rtVersion.equals(ArtifactoryVersion.NOT_FOUND)){
+                addActionError("Couldn't reach JFrog Artifactory server");
+            }
+            addActionMessage("Connection successful! JFrog Artifactory version: " + rtVersion);
+        } catch (Exception e) {
+            addActionError("Connection failed: " + e.getMessage());
+            log.error("Error while testing the connection to Artifactory server " + url, e);
         }
-        addActionError("Connection failed " + errorMessage);
-        log.error("Error while testing the connection to Artifactory server " + url, e);
     }
 
     /**
      * Update fields to show in the server update page in the UI.
-     * Encrypting password so it won't show in the UI inspection.
+     * Encrypting password, so it won't show in the UI inspection.
      *
      * @param serverConfig - Server being updated.
      */

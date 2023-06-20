@@ -1,20 +1,20 @@
-package org.jfrog.bamboo;
+package org.jfrog.bamboo.utils;
 
 import com.atlassian.bamboo.build.logger.BuildLogger;
 import org.apache.logging.log4j.Logger;
-import org.jfrog.build.api.util.Log;
-
-import java.util.logging.Level;
 
 /**
  * Wrapper for Jenkins build logger, records log messages from BuildInfo
  */
-public class MyLog implements Log {
+public class BuildLog implements org.jfrog.build.api.util.Log {
     private final Logger log;
-    private final BuildLogger buildLogger;
+    private BuildLogger buildLogger;
     private final String JFROG_PREFIX = "[JFrog Plugin] ";
 
-    public MyLog(Logger log, BuildLogger buildLogger) {
+    public BuildLog(Logger log) {
+        this.log = log;
+    }
+    public BuildLog(Logger log, BuildLogger buildLogger) {
         this.log = log;
         this.buildLogger = buildLogger;
     }
