@@ -23,7 +23,6 @@ public class ExecutableRunner {
         fullCommand.add(executable);
         fullCommand.addAll(commandArgs);
         try {
-            buildLog.info("Running command: " + maskSecrets(String.join(" ", fullCommand)));
 
             // Create the process builder
             ProcessBuilder processBuilder = new ProcessBuilder(fullCommand);
@@ -35,6 +34,7 @@ public class ExecutableRunner {
             processBuilder.redirectErrorStream(true);
 
             // Start the process
+            buildLog.info("Running command: " + maskSecrets(String.join(" ", processBuilder.command())));
             Process process = processBuilder.start();
 
             // Read the output of the process

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jfrog.bamboo.admin;
+package org.jfrog.bamboo.config;
 
 import com.atlassian.bamboo.ww2.BambooActionSupport;
 import com.atlassian.bamboo.ww2.aware.permissions.GlobalAdminSecurityAware;
@@ -24,23 +24,25 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.bamboo.utils.BuildLog;
 import org.jfrog.build.client.ArtifactoryVersion;
-import org.jfrog.build.extractor.clientConfiguration.ArtifactoryManagerBuilder;
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class ArtifactoryServerConfigAction extends BambooActionSupport implements GlobalAdminSecurityAware {
 
     private final transient Logger log = LogManager.getLogger(ArtifactoryServerConfigAction.class);
 
     private String mode;
-    private long serverId;
+    private String serverId;
     private String url;
     private String username;
     private String password;
-    private int timeout;
+    private String accessToken;
     private String isSendTest;
 
     private final transient ServerConfigManager serverConfigManager;
@@ -48,24 +50,24 @@ public class ArtifactoryServerConfigAction extends BambooActionSupport implement
     public ArtifactoryServerConfigAction(ServerConfigManager serverConfigManager) {
         this.serverConfigManager = serverConfigManager;
         mode = "add";
-        timeout = 300;
-        }
+    }
 
     @Override
     public void validate() {
         clearErrorsAndMessages();
+        if (mode.equals("add") && serverConfigManager.getServerConfigById(serverId) != null) {
+            addFieldError("serverId", "Server ID already exists.");
+        }
         if (StringUtils.isBlank(url)) {
-            addFieldError("url", "Please specify a URL of an Artifactory server.");
+            addFieldError("url", "Please specify a URL of a JFrog Platform.");
+        } else if (StringUtils.isBlank(serverId)){
+            addFieldError("serverId", "Please specify a Server Id for your JFrog Platform.");
         } else {
             try {
                 new URL(url);
             } catch (MalformedURLException mue) {
-                addFieldError("url", "Please specify a valid URL of an Artifactory server.");
+                addFieldError("url", "Please specify a valid URL of a JFrog Platform.");
             }
-        }
-
-        if (timeout <= 0) {
-            addFieldError("timeout", "Please specify a positive integer.");
         }
     }
 
@@ -80,7 +82,7 @@ public class ArtifactoryServerConfigAction extends BambooActionSupport implement
         }
 
         serverConfigManager.addServerConfiguration(
-                new ServerConfig(-1, getUrl(), getUsername(), getPassword(), getTimeout()));
+                new ServerConfig(getServerId(), getUrl(), getUsername(), getPassword(), getAccessToken()));
         return SUCCESS;
     }
 
@@ -97,10 +99,13 @@ public class ArtifactoryServerConfigAction extends BambooActionSupport implement
     public String doUpdate() throws Exception {
         // Decrypt password from UI, if encrypted.
         password = EncryptionHelper.decryptIfNeeded(password);
+        accessToken = EncryptionHelper.decryptIfNeeded(accessToken);
+
         if (isTesting()) {
             testConnection();
             // Encrypt password when returning it to UI.
             password = EncryptionHelper.encryptForUi(password);
+            accessToken = EncryptionHelper.encryptForUi(accessToken);
             return INPUT;
         }
         serverConfigManager.updateServerConfiguration(createServerConfig());
@@ -136,11 +141,11 @@ public class ArtifactoryServerConfigAction extends BambooActionSupport implement
         return StringUtils.isNotBlank(isSendTest);
     }
 
-    public long getServerId() {
+    public String getServerId() {
         return serverId;
     }
 
-    public void setServerId(long serverId) {
+    public void setServerId(String serverId) {
         this.serverId = serverId;
     }
 
@@ -168,12 +173,12 @@ public class ArtifactoryServerConfigAction extends BambooActionSupport implement
         this.password = password;
     }
 
-    public int getTimeout() {
-        return timeout;
+    public String getAccessToken() {
+        return accessToken;
     }
 
-    public void setTimeout(int timeout) {
-        this.timeout = timeout;
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
     }
 
     public String getIsSendTest() {
@@ -204,14 +209,15 @@ public class ArtifactoryServerConfigAction extends BambooActionSupport implement
      * @param serverConfig - Server being updated.
      */
     private void updateFieldsFromServerConfig(ServerConfig serverConfig) {
+        setServerId(serverConfig.getServerId());
         setUrl(serverConfig.getUrl());
         setUsername(serverConfig.getUsername());
         setPassword(EncryptionHelper.encryptForUi(serverConfig.getPassword()));
-        setTimeout(serverConfig.getTimeout());
+        setAccessToken(EncryptionHelper.encryptForUi(serverConfig.getAccessToken()));
     }
 
     @NotNull
     private ServerConfig createServerConfig() {
-        return new ServerConfig(serverId, url, username, password, timeout);
+        return new ServerConfig(serverId, url, username, password, accessToken);
     }
 }

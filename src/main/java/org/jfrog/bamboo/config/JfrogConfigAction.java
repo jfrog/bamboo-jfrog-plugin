@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jfrog.bamboo.admin;
+package org.jfrog.bamboo.config;
 
 import com.atlassian.bamboo.configuration.GlobalAdminAction;
 import com.atlassian.bamboo.ww2.aware.permissions.GlobalAdminSecurityAware;

@@ -1,6 +1,3 @@
-[#-- @ftlvariable name="action" type="org.jfrog.bamboo.admin.ExistingArtifactoryServerAction" --]
-[#-- @ftlvariable name="" type="org.jfrog.bamboo.admin.ExistingArtifactoryServerAction" --]
-
 <div class="toolbar">
     <div class="aui-toolbar inline">
         <ul class="toolbar-group">
@@ -21,10 +18,9 @@
 <table id="existingArtifactoryServer" class="aui">
     <thead>
     <tr>
-        <th>ServerID</th>
-        <th>Artifactory Server URL</th>
+        <th>Server ID</th>
+        <th>JFrog Platform URL</th>
         <th>Username</th>
-        <th>Timeout</th>
         <th class="operations">Operations</th>
     </tr>
     </thead>
@@ -32,7 +28,7 @@
         [#foreach serverConfig in serverConfigs]
             <tr>
                 <td>
-                    ${serverConfig.id}
+                    ${serverConfig.serverId}
                 </td>
                 <td>
                     <a href="${serverConfig.url}" target="_blank" >${serverConfig.url}</a>
@@ -40,16 +36,13 @@
                 <td>
                 ${serverConfig.username}
                 </td>
-                <td>
-                ${serverConfig.timeout}
-                </td>
                 <td class="operations">
-                    <a id="editServer-${serverConfig.id}" href="[@ww.url action='editServer' serverId=serverConfig.id/]">
+                    <a id="editServer-${serverConfig.serverId}" href="[@ww.url action='editServer' serverId=serverConfig.serverId/]">
                         Edit
                     </a>
                     |
-                    <a id="deleteServer-${serverConfig.id}"
-                       href="[@ww.url action='confirmDeleteServer' serverId=serverConfig.id returnUrl=currentUrl/]"
+                    <a id="deleteServer-${serverConfig.serverId}"
+                       href="[@ww.url action='confirmDeleteServer' serverId=serverConfig.serverId returnUrl=currentUrl/]"
                        class="delete" title="[@ww.text name='artifactory.server.delete' /]">[@ww.text name="global.buttons.delete" /]
                     </a>
                 </td>
@@ -67,5 +60,3 @@
 [/@ui.bambooPanel]
 
 [@dj.simpleDialogForm triggerSelector=".delete" width=560 height=400 headerKey="artifactory.server.delete" submitCallback="reloadThePage"/]
-
-[#--[@cp.entityPagination actionUrl='${req.contextPath}/admin/jfrogConfig.action?' paginationSupport=paginationSupport /]--]

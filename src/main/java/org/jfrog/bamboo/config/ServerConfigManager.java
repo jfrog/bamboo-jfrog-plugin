@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jfrog.bamboo.admin;
+package org.jfrog.bamboo.config;
 
 import com.atlassian.bamboo.bandana.PlanAwareBandanaContext;
 import com.atlassian.bandana.BandanaManager;
@@ -34,6 +34,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
@@ -43,19 +44,17 @@ public class ServerConfigManager implements Serializable {
 
     private final transient Logger log = LogManager.getLogger(ServerConfigManager.class);
 
-    private static final String ARTIFACTORY_CONFIG_KEY = "org.jfrog.bamboo.server.configurations.v2";
+    private static final String JFROG_CONFIG_KEY = "org.jfrog.bamboo.server.config";
     private final List<ServerConfig> configuredServers = new CopyOnWriteArrayList<>();
     private BandanaManager bandanaManager = null;
-    private final AtomicLong nextAvailableId = new AtomicLong(0);
-
 
     public List<ServerConfig> getAllServerConfigs() {
         return new ArrayList<>(configuredServers);
     }
 
-    public ServerConfig getServerConfigById(long id) {
+    public ServerConfig getServerConfigById(String serverId) {
         for (ServerConfig configuredServer : configuredServers) {
-            if (configuredServer.getId() == id) {
+            if (Objects.equals(configuredServer.getServerId(), serverId)) {
                 return configuredServer;
             }
         }
@@ -70,7 +69,6 @@ public class ServerConfigManager implements Serializable {
     }
 
     public void addServerConfiguration(ServerConfig serverConfig) {
-        serverConfig.setId(nextAvailableId.getAndIncrement());
         configuredServers.add(serverConfig);
         try {
             persist();
@@ -79,9 +77,9 @@ public class ServerConfigManager implements Serializable {
         }
     }
 
-    public void deleteServerConfiguration(final long id) {
+    public void deleteServerConfiguration(final String serverId) {
         for (ServerConfig configuredServer : configuredServers) {
-            if (configuredServer.getId() == id) {
+            if (Objects.equals(configuredServer.getServerId(), serverId)) {
                 configuredServers.remove(configuredServer);
                 try {
                     persist();
@@ -95,11 +93,12 @@ public class ServerConfigManager implements Serializable {
 
     public void updateServerConfiguration(ServerConfig updated) {
         for (ServerConfig configuredServer : configuredServers) {
-            if (configuredServer.getId() == updated.getId()) {
+            if (Objects.equals(configuredServer.getServerId(), updated.getServerId())) {
+                configuredServer.setServerId(updated.getServerId());
                 configuredServer.setUrl(updated.getUrl());
                 configuredServer.setUsername(updated.getUsername());
                 configuredServer.setPassword(updated.getPassword());
-                configuredServer.setTimeout(updated.getTimeout());
+                configuredServer.setAccessToken(updated.getAccessToken());
                 try {
                     persist();
                 } catch (IllegalAccessException | UnsupportedEncodingException e) {
@@ -123,7 +122,7 @@ public class ServerConfigManager implements Serializable {
     private void setArtifactoryServers(BandanaManager bandanaManager)
             throws IOException, InstantiationException, IllegalAccessException {
 
-        String existingArtifactoryConfig = (String) bandanaManager.getValue(PlanAwareBandanaContext.GLOBAL_CONTEXT, ARTIFACTORY_CONFIG_KEY);
+        String existingArtifactoryConfig = (String) bandanaManager.getValue(PlanAwareBandanaContext.GLOBAL_CONTEXT, JFROG_CONFIG_KEY);
         if (StringUtils.isNotBlank(existingArtifactoryConfig)) {
             List<ServerConfig> serverConfigList = getServersFromXml(existingArtifactoryConfig);
             for (Object serverConfig : serverConfigList) {
@@ -132,13 +131,15 @@ public class ServerConfigManager implements Serializable {
                 ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
                 String json = ow.writeValueAsString(serverConfig);
                 ServerConfig tempServerConfig = new ObjectMapper().readValue(json, ServerConfig.class);
-
-                if (nextAvailableId.get() <= tempServerConfig.getId()) {
-                    nextAvailableId.set(tempServerConfig.getId() + 1);
-                }
-
-                configuredServers.add(new ServerConfig(tempServerConfig.getId(), tempServerConfig.getUrl(), tempServerConfig.getUsername(),
-                        EncryptionHelper.decrypt(tempServerConfig.getPassword()), tempServerConfig.getTimeout()));
+                configuredServers.add(
+                        new ServerConfig(
+                                tempServerConfig.getServerId(),
+                                tempServerConfig.getUrl(),
+                                tempServerConfig.getUsername(),
+                                EncryptionHelper.decrypt(tempServerConfig.getPassword()),
+                                EncryptionHelper.decrypt(tempServerConfig.getAccessToken())
+                        )
+                );
             }
         }
     }
@@ -147,16 +148,23 @@ public class ServerConfigManager implements Serializable {
         List<ServerConfig> serverConfigs = new ArrayList<>();
 
         for (ServerConfig serverConfig : configuredServers) {
-            serverConfigs.add(new ServerConfig(serverConfig.getId(), serverConfig.getUrl(), serverConfig.getUsername(),
-                    EncryptionHelper.encryptForConfig(serverConfig.getPassword()), serverConfig.getTimeout()));
+            serverConfigs.add(
+                    new ServerConfig(
+                            serverConfig.getServerId(),
+                            serverConfig.getUrl(),
+                            serverConfig.getUsername(),
+                            EncryptionHelper.encryptForConfig(serverConfig.getPassword()),
+                            EncryptionHelper.encryptForConfig(serverConfig.getAccessToken())
+                    )
+            );
         }
         String serverConfigsString = toXMLString(serverConfigs);
-        bandanaManager.setValue(PlanAwareBandanaContext.GLOBAL_CONTEXT, ARTIFACTORY_CONFIG_KEY, serverConfigsString);
+        bandanaManager.setValue(PlanAwareBandanaContext.GLOBAL_CONTEXT, JFROG_CONFIG_KEY, serverConfigsString);
     }
 
     private List<ServerConfig> getServersFromXml(String stringXml) throws IllegalAccessException, InstantiationException {
         List<ServerConfig> serverConfigs = new ArrayList<>();
-        List<String> stringServerConfigs = findAllObjects(ServerConfig.class, stringXml);
+        List<String> stringServerConfigs = findAllObjects(stringXml);
         for (String stringServerConfig : stringServerConfigs) {
             serverConfigs.add(getObjectFromStringXml(stringServerConfig, ServerConfig.class));
         }
@@ -183,23 +191,17 @@ public class ServerConfigManager implements Serializable {
         return object;
     }
 
-    private List<String> findAllObjects(Class providedClass, String scannedString) {
+    private List<String> findAllObjects(String scannedString) {
         List<String> foundStrings = new ArrayList<>();
-        String foundString = findFirstObject(providedClass.getSimpleName(), scannedString, false);
+        String foundString = findFirstObject(ServerConfig.class.getSimpleName(), scannedString, false);
         while (!"".equals(foundString)) {
             foundStrings.add(foundString);
             scannedString = scannedString.replaceFirst(foundString, "");
-            foundString = findFirstObject(providedClass.getSimpleName(), scannedString, false);
+            foundString = findFirstObject(ServerConfig.class.getSimpleName(), scannedString, false);
         }
         return foundStrings;
     }
 
-    /**
-     * Returns the found string or empty string if not found
-     * @param objectToFind
-     * @param stringToScan
-     * @return
-     */
     private String findFirstObject(String objectToFind, String stringToScan, boolean dataOnly) {
         String patternString = String.format("<%s>?(.*?)</%s>", objectToFind, objectToFind);
         Pattern pattern = Pattern.compile(patternString);

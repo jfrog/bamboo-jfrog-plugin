@@ -1,86 +1,45 @@
 package org.jfrog.bamboo;
 
 
-import com.atlassian.bamboo.buildqueue.manager.AgentManager;
-import com.atlassian.bamboo.collections.ActionParametersMap;
 import com.atlassian.bamboo.configuration.ConfigurationMap;
 import com.atlassian.bamboo.task.*;
 
 import com.atlassian.bamboo.v2.build.BuildContext;
 import com.atlassian.bamboo.variable.CustomVariableContext;
 import com.atlassian.plugin.PluginAccessor;
-import com.google.inject.Inject;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.tools.ant.types.Commandline;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jfrog.bamboo.admin.ServerConfig;
-import org.jfrog.bamboo.admin.ServerConfigManager;
+import org.jfrog.bamboo.config.ServerConfig;
+import org.jfrog.bamboo.config.ServerConfigManager;
 import org.jfrog.bamboo.utils.BambooUtils;
 import org.jfrog.bamboo.utils.BuildLog;
 import org.jfrog.bamboo.utils.ExecutableRunner;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 import static java.lang.String.format;
 
-public class CliTask extends AbstractTaskConfigurator implements TaskType  {
-    protected static final Logger log = LogManager.getLogger(CliTask.class);
+public class JfTask extends JfContext implements TaskType  {
+    protected static final Logger log = LogManager.getLogger(JfTask.class);
     protected transient ServerConfigManager serverConfigManager;
     private BuildLog buildLog;
-    private final String JFROG_TASK_CLI_SERVER_ID = "jfrog.task.cli.serverid";
-    private final String JFROG_TASK_CLI_COMMAND = "jfrog.task.cli.command";
     private ExecutableRunner commandRunner;
     protected CustomVariableContext customVariableContext;
     protected PluginAccessor pluginAccessor;
 
     @Override
-    public void populateContextForCreate(@NotNull Map<String, Object> context) {
-        super.populateContextForCreate(context);
-        serverConfigManager = ServerConfigManager.getInstance();
-        context.put("serverConfigManager", serverConfigManager);
-        context.put("selectedServerId", 1);
-    }
-
-    @Override
-    public void populateContextForEdit(@NotNull Map<String, Object> context, @NotNull TaskDefinition taskDefinition) {
-        super.populateContextForEdit(context, taskDefinition);
-        serverConfigManager = ServerConfigManager.getInstance();
-        context.put(JFROG_TASK_CLI_SERVER_ID, taskDefinition.getConfiguration().get(JFROG_TASK_CLI_SERVER_ID));
-        context.put(JFROG_TASK_CLI_COMMAND, taskDefinition.getConfiguration().get(JFROG_TASK_CLI_COMMAND));
-        context.put("serverConfigManager", serverConfigManager);
-    }
-    @Override
-    @NotNull
-    public Map<String, String> generateTaskConfigMap(
-            @NotNull final ActionParametersMap params,
-            @Nullable final TaskDefinition previousTaskDefinition
-    ) {
-        final Map<String, String> config = super.generateTaskConfigMap(params, previousTaskDefinition);
-        config.put(JFROG_TASK_CLI_SERVER_ID, params.getString(JFROG_TASK_CLI_SERVER_ID));
-        config.put(JFROG_TASK_CLI_COMMAND, params.getString(JFROG_TASK_CLI_COMMAND));
-        return config;
-    }
-
-    private void initTask(final TaskContext taskContext) {
-        this.buildLog = new BuildLog(log, taskContext.getBuildLogger());
-        this.serverConfigManager = ServerConfigManager.getInstance();
-
-    }
-
-    @Override
     public @NotNull TaskResult execute(final @NotNull TaskContext taskContext) throws TaskException {
-        initTask(taskContext);
+        buildLog = new BuildLog(log, taskContext.getBuildLogger());
+        serverConfigManager = ServerConfigManager.getInstance();
         ConfigurationMap confMap = taskContext.getConfigurationMap();
-        String serverId = confMap.get(JFROG_TASK_CLI_SERVER_ID);
+        String serverId = confMap.get(JF_TASK_SERVER_ID);
         try {
             // Download CLI (if needed) and retrieve path
-            String jfExecutablePath = JFrogCliInstaller.getJfExecutable(
+            String jfExecutablePath = JfInstaller.getJfExecutable(
                     "",
                     buildLog);
 
@@ -92,12 +51,19 @@ public class CliTask extends AbstractTaskConfigurator implements TaskType  {
                     buildLog
             );
 
+            buildLog.info("myconf: " + confMap);
             // Run 'jf config add' and 'jf config use' commands.
             runJFrogConfigAddCommand(serverId);
 
             // Running JFrog CLI command
-            String cliCommand = confMap.get(JFROG_TASK_CLI_COMMAND);
-            List<String> cliCommandArgs = Arrays.asList(cliCommand.split(" "));
+            String cliCommand = confMap.get(JF_TASK_COMMAND);
+            String[] splitArgs =cliCommand.trim().split(" ");
+            List<String> cliCommandArgs = new ArrayList<>(Arrays.asList(splitArgs));
+            // Received command format is 'jf <arg1> <<arg2> ...'
+            // We remove 'jf' because the executable already exists on the command runner object.
+            if (cliCommandArgs.get(0).equalsIgnoreCase("jf")) {
+                cliCommandArgs.remove(0);
+            }
             commandRunner.run(cliCommandArgs);
 
         } catch (IOException | InterruptedException e) {
@@ -123,7 +89,7 @@ public class CliTask extends AbstractTaskConfigurator implements TaskType  {
     }
 
     private void runJFrogConfigAddCommand(String serverId) throws IOException, InterruptedException {
-        ServerConfig selectedServerConfig = serverConfigManager.getServerConfigById(Long.parseLong(serverId));
+        ServerConfig selectedServerConfig = serverConfigManager.getServerConfigById(serverId);
         if (selectedServerConfig == null) {
             throw new IllegalArgumentException("Could not find Artifactory server. Please check the Artifactory server in the task configuration.");
         }

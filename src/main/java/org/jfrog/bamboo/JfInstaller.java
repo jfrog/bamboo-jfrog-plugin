@@ -1,8 +1,6 @@
 package org.jfrog.bamboo;
 
-import com.atlassian.bamboo.variable.CustomVariableContext;
 import org.apache.commons.lang.StringUtils;
-import org.jfrog.bamboo.utils.BambooUtils;
 import org.jfrog.bamboo.utils.BuildLog;
 import org.jfrog.bamboo.utils.OsUtils;
 
@@ -15,7 +13,7 @@ import java.nio.file.Paths;
 
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import static java.lang.String.format;
-public class JFrogCliInstaller {
+public class JfInstaller {
     private static final String RELEASE = "[RELEASE]";
     public static final String RELEASES_ARTIFACTORY_URL = "https://releases.jfrog.io/artifactory";
     public static final String REPOSITORY = "jfrog-cli";

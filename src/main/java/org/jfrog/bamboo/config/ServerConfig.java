@@ -14,42 +14,44 @@
  * limitations under the License.
  */
 
-package org.jfrog.bamboo.admin;
+package org.jfrog.bamboo.config;
 
 import java.io.Serializable;
 
+import static java.lang.String.format;
+
 public class ServerConfig implements Serializable {
-    private long id;
+    private String serverId;
     private String url;
     private String username;
     private String password;
-    private int timeout = 300;
+    private String accessToken;
 
     public ServerConfig() {
     }
 
-    public ServerConfig(long id, String url, String username, String password, int timeout) {
-        this.id = id;
+    public ServerConfig(String serverId, String url, String username, String password, String accessToken) {
+        this.serverId = serverId;
         this.url = url;
         this.username = username;
         this.password = password;
-        this.timeout = timeout;
+        this.accessToken = accessToken;
     }
 
     public ServerConfig(ServerConfig serverConfig) {
-        this.id = serverConfig.id;
+        this.serverId = serverConfig.serverId;
         this.url = serverConfig.url;
         this.username = serverConfig.username;
         this.password = serverConfig.password;
-        this.timeout = serverConfig.timeout;
+        this.accessToken = serverConfig.accessToken;
     }
 
-    public long getId() {
-        return id;
+    public String getServerId() {
+        return serverId;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public void setServerId(String serverId) {
+        this.serverId = serverId;
     }
 
     public String getUrl() {
@@ -76,11 +78,16 @@ public class ServerConfig implements Serializable {
         this.password = password;
     }
 
-    public int getTimeout() {
-        return timeout;
+    public String getAccessToken() {
+        return accessToken;
     }
 
-    public void setTimeout(int timeout) {
-        this.timeout = timeout;
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    @Override
+    public String toString() {
+        return format("%s (%s)", serverId , url);
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jfrog.bamboo.admin;
+package org.jfrog.bamboo.config;
 
 import com.atlassian.bamboo.security.GlobalApplicationSecureObject;
 import com.atlassian.bamboo.ww2.actions.admin.user.AbstractEntityPagerSupport;

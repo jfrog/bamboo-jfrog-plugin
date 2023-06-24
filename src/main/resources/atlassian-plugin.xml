@@ -3,8 +3,8 @@
         <description>${project.description}</description>
         <version>${project.version}</version>
         <vendor name="${project.organization.name}" url="${project.organization.url}" />
-        <param name="plugin-icon">images/pluginIcon.png</param>
-        <param name="plugin-logo">images/pluginLogo.png</param>
+        <param name="plugin-icon">images/jfrogLogo.png</param>
+        <param name="plugin-logo">images/jfrogLogo.png</param>
         <param name="configure.url">/admin/jfrogConfig.action</param>
         <param name="post.install.url">/admin/jfrogConfig.action</param>
     </plugin-info>
@@ -12,12 +12,12 @@
     <!-- i18n resource -->
     <resource type="i18n" name="i18n-jfrog" location="i18n-jfrog"/>
 
-    <taskType key="cliTask" name="CLI Task" class="org.jfrog.bamboo.CliTask">
+    <taskType key="JfTask" name="JFrog CLI Task" class="org.jfrog.bamboo.JfTask">
         <category name="deployment"/>
-        <configuration class="org.jfrog.bamboo.CliTask"/>
-        <resource type="freemarker" name="edit" location="/templates/editJFrogCliTask.ftl"/>
-        <description>A task that prints 'Hello, World!'</description>
-        <resource type="download" name="icon" location="/images/artifactory-icon.png"/>
+        <configuration class="org.jfrog.bamboo.JfTask"/>
+        <resource type="freemarker" name="edit" location="/templates/editJfTask.ftl"/>
+        <description>A task that runs JFrog CLI commands.</description>
+        <resource type="download" name="icon" location="/images/jfrogLogo.png"/>
     </taskType>
 
     <postBuildCompletedAction
@@ -28,7 +28,7 @@
 
     <!-- Admin Configurations -->
     <component name="Artifactory Server Configuration Management Component" key="artifactoryServerConfigManager"
-               class="org.jfrog.bamboo.admin.ServerConfigManager"/>
+               class="org.jfrog.bamboo.config.ServerConfigManager"/>
 
     <web-item key="configureArtifactoryPlugin" name="JFrog Plugin" section="system.admin/plugins">
         <label key="JFrog Plugin"/>
@@ -39,45 +39,45 @@
         <package name="configureArtifactoryPlugin" extends="admin">
 
             <!-- Main container -->
-            <action name="jfrogConfig" class="org.jfrog.bamboo.admin.JfrogConfigAction">
+            <action name="jfrogConfig" class="org.jfrog.bamboo.config.JfrogConfigAction">
                 <result name="input" type="freemarker">/templates/jfrogConfig.ftl</result>
                 <result name="success" type="freemarker">/templates/jfrogConfig.ftl</result>
             </action>
 
             <!-- Artifactory Configurations -->
-            <action name="existingArtifactoryServer" class="org.jfrog.bamboo.admin.ExistingArtifactoryServerAction" method="browse">
+            <action name="existingArtifactoryServer" class="org.jfrog.bamboo.config.ExistingArtifactoryServerAction" method="browse">
                 <result name="success" type="freemarker">/templates/viewExistingArtifactoryServer.ftl</result>
             </action>
 
-            <action name="artifactoryServerConfig" class="org.jfrog.bamboo.admin.ArtifactoryServerConfigAction" method="browse">
+            <action name="artifactoryServerConfig" class="org.jfrog.bamboo.config.ArtifactoryServerConfigAction" method="browse">
                 <result name="input" type="freemarker">/templates/artifactoryServerConfig.ftl</result>
                 <result name="success" type="freemarker">/templates/artifactoryServerConfig.ftl</result>
             </action>
 
-            <action name="createArtifactoryServer" class="org.jfrog.bamboo.admin.ArtifactoryServerConfigAction" method="create">
+            <action name="createArtifactoryServer" class="org.jfrog.bamboo.config.ArtifactoryServerConfigAction" method="create">
                 <result name="input" type="freemarker">/templates/artifactoryServerConfig.ftl</result>
                 <result name="success" type="redirect">/admin/jfrogConfig.action</result>
                 <result name="error" type="freemarker">/templates/artifactoryServerConfig.ftl</result>
                 <param name="mode">add</param>
             </action>
 
-            <action name="editServer" class="org.jfrog.bamboo.admin.ArtifactoryServerConfigAction" method="edit">
+            <action name="editServer" class="org.jfrog.bamboo.config.ArtifactoryServerConfigAction" method="edit">
                 <result name="input" type="freemarker">/templates/artifactoryServerConfig.ftl</result>
                 <param name="mode">edit</param>
             </action>
 
-            <action name="updateServer" class="org.jfrog.bamboo.admin.ArtifactoryServerConfigAction" method="update">
+            <action name="updateServer" class="org.jfrog.bamboo.config.ArtifactoryServerConfigAction" method="update">
                 <result name="input" type="freemarker">/templates/artifactoryServerConfig.ftl</result>
                 <result name="success" type="redirect">/admin/jfrogConfig.action</result>
                 <param name="mode">edit</param>
             </action>
 
-            <action name="confirmDeleteServer" class="org.jfrog.bamboo.admin.ArtifactoryServerConfigAction" method="confirm">
+            <action name="confirmDeleteServer" class="org.jfrog.bamboo.config.ArtifactoryServerConfigAction" method="confirm">
                 <result name="input" type="freemarker" >/templates/confirmDeleteServer.ftl</result>
                 <result name="success" type="freemarker" >/templates/confirmDeleteServer.ftl</result>
             </action>
 
-            <action name="deleteServer" class="org.jfrog.bamboo.admin.ArtifactoryServerConfigAction" method="delete">
+            <action name="deleteServer" class="org.jfrog.bamboo.config.ArtifactoryServerConfigAction" method="delete">
                 <result name="input" type="redirect">/templates/artifactoryServerConfig.ftl</result>
                 <result name="success" type="redirect">/admin/jfrogConfig.action</result>
                 <result name="error" type="redirect">/admin/jfrogConfig.action</result>

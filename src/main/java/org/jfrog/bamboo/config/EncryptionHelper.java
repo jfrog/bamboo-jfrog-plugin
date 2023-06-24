@@ -1,4 +1,4 @@
-package org.jfrog.bamboo.admin;
+package org.jfrog.bamboo.config;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
