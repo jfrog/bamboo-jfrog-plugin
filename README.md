@@ -1,4 +1,10 @@
+[![](src/main/resources/images/intro.png)](#readme)
+
+<div align="center">
+
 # Bamboo JFrog Plugin
+
+</div>
 
 ## Overview
 Artifactory provides tight integration with Bamboo through the Bamboo JFrog Plug-in.
