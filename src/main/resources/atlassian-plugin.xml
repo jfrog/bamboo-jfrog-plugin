@@ -1,0 +1,85 @@
+<atlassian-plugin key="${atlassian.plugin.key}" name="${project.name}" plugins-version="2">
+    <plugin-info>
+        <description>${project.description}</description>
+        <version>${project.version}</version>
+        <vendor name="JFrog" url="https://www.jfrog.com" />
+        <param name="plugin-icon">images/jfrogLogo.png</param>
+        <param name="plugin-logo">images/jfrogLogo.png</param>
+        <param name="configure.url">/admin/jfrogConfiguration.action</param>
+        <param name="post.install.url">/admin/jfrogConfiguration.action</param>
+    </plugin-info>
+
+    <taskType key="JfTask" name="JFrog CLI Task" class="org.jfrog.bamboo.JfTask">
+        <category name="deployment"/>
+        <configuration class="org.jfrog.bamboo.JfTask"/>
+        <resource type="freemarker" name="edit" location="/templates/editJfTask.ftl"/>
+        <description>A task that runs JFrog CLI commands.</description>
+        <resource type="download" name="icon" location="/images/jfrogLogo.png"/>
+    </taskType>
+
+    <postBuildCompletedAction
+            key="PostBuildAction"
+            class="org.jfrog.bamboo.PostBuildAction">
+        <description>Cleans up the temporary JFrog directory when the build is completed</description>
+    </postBuildCompletedAction>
+
+    <!-- Admin Configurations -->
+    <component name="JFrog Server Configuration Management Component" key="jfrogServerConfigManager"
+               class="org.jfrog.bamboo.config.ServerConfigManager"/>
+
+    <web-item key="configureJfrogPlugin" name="JFrog Plugin" section="system.admin/plugins">
+        <label key="JFrog Plugin"/>
+        <link linkId="configureJfrogPlugin">/templates/jfrogConfiguration.action</link>
+    </web-item>
+
+    <xwork key="jfrogConfigAdmin" name="JFrog Plugin">
+        <package name="configureJfrogPlugin" extends="admin">
+
+            <!-- Main container -->
+            <action name="jfrogConfiguration" class="org.jfrog.bamboo.config.JfrogConfigurationAction">
+                <result name="input" type="freemarker">/templates/jfrogConfiguration.ftl</result>
+                <result name="success" type="freemarker">/templates/jfrogConfiguration.ftl</result>
+            </action>
+
+            <!-- JFrog Configurations -->
+            <action name="existingServersList" class="org.jfrog.bamboo.config.ExistingServersListAction" method="browse">
+                <result name="success" type="freemarker">/templates/viewExistingServersList.ftl</result>
+            </action>
+
+            <action name="jfrogServerConfig" class="org.jfrog.bamboo.config.JfrogServerConfigAction" method="browse">
+                <result name="input" type="freemarker">/templates/jfrogServerConfig.ftl</result>
+                <result name="success" type="freemarker">/templates/jfrogServerConfig.ftl</result>
+            </action>
+
+            <action name="createJfrogServer" class="org.jfrog.bamboo.config.JfrogServerConfigAction" method="create">
+                <result name="input" type="freemarker">/templates/jfrogServerConfig.ftl</result>
+                <result name="success" type="redirect">/admin/jfrogConfiguration.action</result>
+                <result name="error" type="freemarker">/templates/jfrogServerConfig.ftl</result>
+                <param name="mode">add</param>
+            </action>
+
+            <action name="editServer" class="org.jfrog.bamboo.config.JfrogServerConfigAction" method="edit">
+                <result name="input" type="freemarker">/templates/jfrogServerConfig.ftl</result>
+                <param name="mode">edit</param>
+            </action>
+
+            <action name="updateServer" class="org.jfrog.bamboo.config.JfrogServerConfigAction" method="update">
+                <result name="input" type="freemarker">/templates/jfrogServerConfig.ftl</result>
+                <result name="success" type="redirect">/admin/jfrogConfiguration.action</result>
+                <param name="mode">edit</param>
+            </action>
+
+            <action name="confirmDeleteServer" class="org.jfrog.bamboo.config.JfrogServerConfigAction" method="confirm">
+                <result name="input" type="freemarker" >/templates/confirmDeleteServer.ftl</result>
+                <result name="success" type="freemarker" >/templates/confirmDeleteServer.ftl</result>
+            </action>
+
+            <action name="deleteServer" class="org.jfrog.bamboo.config.JfrogServerConfigAction" method="delete">
+                <result name="input" type="redirect">/templates/jfrogServerConfig.ftl</result>
+                <result name="success" type="redirect">/admin/jfrogConfiguration.action</result>
+                <result name="error" type="redirect">/admin/jfrogConfiguration.action</result>
+            </action>
+
+        </package>
+    </xwork>
+</atlassian-plugin>
