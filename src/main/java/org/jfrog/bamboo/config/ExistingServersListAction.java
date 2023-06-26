@@ -22,11 +22,11 @@ import com.atlassian.bamboo.ww2.aware.permissions.GlobalAdminSecurityAware;
 
 import java.util.List;
 
-public class ExistingArtifactoryServerAction extends AbstractEntityPagerSupport implements GlobalAdminSecurityAware {
+public class ExistingServersListAction extends AbstractEntityPagerSupport implements GlobalAdminSecurityAware {
 
 	private ServerConfigManager serverConfigManager;
 
-	public ExistingArtifactoryServerAction(ServerConfigManager serverConfigManager) {
+	public ExistingServersListAction(ServerConfigManager serverConfigManager) {
 		this.serverConfigManager = serverConfigManager;
 	}
 

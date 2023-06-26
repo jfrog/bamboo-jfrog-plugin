@@ -73,7 +73,7 @@ public class ServerConfigManager implements Serializable {
         try {
             persist();
         } catch (IllegalAccessException | UnsupportedEncodingException e) {
-            log.error("Could not add Artifactory configuration.", e);
+            log.error("Could not add JFrog configuration.", e);
         }
     }
 
@@ -84,7 +84,7 @@ public class ServerConfigManager implements Serializable {
                 try {
                     persist();
                 } catch (IllegalAccessException | UnsupportedEncodingException e) {
-                    log.error("Could not delete Artifactory configuration.", e);
+                    log.error("Could not delete JFrog configuration.", e);
                 }
                 break;
             }
@@ -102,7 +102,7 @@ public class ServerConfigManager implements Serializable {
                 try {
                     persist();
                 } catch (IllegalAccessException | UnsupportedEncodingException e) {
-                    log.error("Could not update Artifactory configuration.", e);
+                    log.error("Could not update JFrog configuration.", e);
                 }
                 break;
             }
@@ -113,18 +113,18 @@ public class ServerConfigManager implements Serializable {
     public void setBandanaManager(BandanaManager bandanaManager) {
         this.bandanaManager = bandanaManager;
         try {
-            setArtifactoryServers(bandanaManager);
+            setJfrogServers(bandanaManager);
         } catch (InstantiationException | IllegalAccessException | IOException e) {
-            log.error("Could not load Artifactory configuration.", e);
+            log.error("Could not load JFrog configuration.", e);
         }
     }
 
-    private void setArtifactoryServers(BandanaManager bandanaManager)
+    private void setJfrogServers(BandanaManager bandanaManager)
             throws IOException, InstantiationException, IllegalAccessException {
 
-        String existingArtifactoryConfig = (String) bandanaManager.getValue(PlanAwareBandanaContext.GLOBAL_CONTEXT, JFROG_CONFIG_KEY);
-        if (StringUtils.isNotBlank(existingArtifactoryConfig)) {
-            List<ServerConfig> serverConfigList = getServersFromXml(existingArtifactoryConfig);
+        String existingServersListAction = (String) bandanaManager.getValue(PlanAwareBandanaContext.GLOBAL_CONTEXT, JFROG_CONFIG_KEY);
+        if (StringUtils.isNotBlank(existingServersListAction)) {
+            List<ServerConfig> serverConfigList = getServersFromXml(existingServersListAction);
             for (Object serverConfig : serverConfigList) {
                 // Because of some class loader issues we had to get a workaround,
                 // we serialize and deserialize the serverConfig object.

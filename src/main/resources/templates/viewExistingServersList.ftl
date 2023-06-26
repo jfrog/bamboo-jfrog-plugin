@@ -3,8 +3,8 @@
         <ul class="toolbar-group">
             <li class="toolbar-item">
                 <a class="toolbar-trigger"
-                   href="[@s.url action='artifactoryServerConfig' namespace='/admin' /]">
-                [@s.text name='artifactory.server.add' /]</a>
+                   href="[@s.url action='jfrogServerConfig' namespace='/admin' /]">
+                [@ww.text name="New JFrog Platform Configuration" /]</a>
             </li>
         </ul>
     </div>
@@ -15,7 +15,7 @@
 [@ui.bambooPanel]
 
 <div>
-<table id="existingArtifactoryServer" class="aui">
+<table id="existingServersList" class="aui">
     <thead>
     <tr>
         <th>Server ID</th>
@@ -43,7 +43,8 @@
                     |
                     <a id="deleteServer-${serverConfig.serverId}"
                        href="[@ww.url action='confirmDeleteServer' serverId=serverConfig.serverId returnUrl=currentUrl/]"
-                       class="delete" title="[@ww.text name='artifactory.server.delete' /]">[@ww.text name="global.buttons.delete" /]
+                       class="delete" title="[@ww.text name="Delete JFrog Platform Configuration" /]">
+                        Delete
                     </a>
                 </td>
             </tr>
@@ -51,7 +52,7 @@
     [#else]
         <tr>
             <td class="labelPrefixCell" colspan="4">
-                [@ww.text name="artifactory.server.manage.none"/]
+                [@ww.text label="There are currently no JFrog Servers defined"/]
             </td>
         </tr>
     [/#if]
@@ -59,4 +60,4 @@
 </div>
 [/@ui.bambooPanel]
 
-[@dj.simpleDialogForm triggerSelector=".delete" width=560 height=400 headerKey="artifactory.server.delete" submitCallback="reloadThePage"/]
+[@dj.simpleDialogForm triggerSelector=".delete" width=560 height=400 header="Delete JFrog Platform Configuration" submitCallback="reloadThePage"/]

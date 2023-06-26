@@ -59,7 +59,7 @@ public class ExecutableRunner {
 
     private String maskSecrets(String arg) {
         return arg.replaceAll("--password=\\S+", "--password=***").
-                replaceAll("--access-token=\\S+", "--password=***");
+                replaceAll("--access-token=\\S+", "--access-token=***");
     }
 
 

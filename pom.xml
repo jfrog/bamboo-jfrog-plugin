@@ -21,7 +21,7 @@
         </license>
     </licenses>
     <scm>
-        <url>https://github.com/JFrogDev/bamboo-artifactory-plugin</url>
+        <url>https://github.com/JFrogDev/bamboo-jfrog-plugin</url>
         <connection>scm:git:git@github.com:JFrogDev/bamboo-artifactory-plugin.git</connection>
     </scm>
 
@@ -30,17 +30,18 @@
     <packaging>atlassian-plugin</packaging>
 
     <properties>
-        <bamboo.version>9.2.1</bamboo.version>
+        <bamboo.version>9.3.0</bamboo.version>
         <bamboo.data.version>${bamboo.version}</bamboo.data.version>
-        <amps.version>8.9.2</amps.version>
-        <plugin.testrunner.version>2.0.2</plugin.testrunner.version>
+        <amps.version>8.10.1</amps.version>
+        <plugin.testrunner.version>2.0.3</plugin.testrunner.version>
         <atlassian.spring.scanner.version>3.0.2</atlassian.spring.scanner.version>
         <!-- This property ensures consistency between the key in atlassian-plugin.xml and the OSGi bundle's key. -->
         <atlassian.plugin.key>${project.groupId}.${project.artifactId}</atlassian.plugin.key>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <buildinfo.version>2.37.2</buildinfo.version>
+        <java.version>11</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <buildinfo.version>2.40.0</buildinfo.version>
     </properties>
 
     <profiles>
@@ -94,12 +95,12 @@
         <dependency>
             <groupId>org.jfrog.filespecs</groupId>
             <artifactId>file-specs-java</artifactId>
-            <version>1.1.1</version>
+            <version>1.1.2</version>
         </dependency>
         <dependency>
             <groupId>org.jfrog.artifactory.client</groupId>
             <artifactId>artifactory-java-client-api</artifactId>
-            <version>2.13.0</version>
+            <version>2.14.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -113,13 +114,6 @@
             <artifactId>javax.inject</artifactId>
             <version>1</version>
             <scope>provided</scope>
-        </dependency>
-        
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.10</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- WIRED TEST RUNNER DEPENDENCIES -->
@@ -150,6 +144,22 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.14.1</version>
         </dependency>
+        <dependency>
+            <groupId>com.jfrog.testing</groupId>
+            <artifactId>jfrog-testing-infra</artifactId>
+            <version>1.1.1</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>log4j-over-slf4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>jcl-over-slf4j</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
 
     <build>
@@ -157,7 +167,7 @@
             <plugin>
                 <groupId>com.atlassian.maven.plugins</groupId>
                 <artifactId>bamboo-maven-plugin</artifactId>
-                <version>8.9.2</version>
+                <version>${amps.version}</version>
                 <extensions>true</extensions>
                 <configuration>
                     <productVersion>${bamboo.version}</productVersion>
@@ -184,9 +194,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
                 <configuration>
-                    <source>9</source>
-                    <target>9</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
         </plugins>

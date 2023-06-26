@@ -28,14 +28,10 @@ import org.jfrog.build.extractor.clientConfiguration.client.artifactory.Artifact
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
-public class ArtifactoryServerConfigAction extends BambooActionSupport implements GlobalAdminSecurityAware {
+public class JfrogServerConfigAction extends BambooActionSupport implements GlobalAdminSecurityAware {
 
-    private final transient Logger log = LogManager.getLogger(ArtifactoryServerConfigAction.class);
+    private final transient Logger log = LogManager.getLogger(JfrogServerConfigAction.class);
 
     private String mode;
     private String serverId;
@@ -47,7 +43,7 @@ public class ArtifactoryServerConfigAction extends BambooActionSupport implement
 
     private final transient ServerConfigManager serverConfigManager;
 
-    public ArtifactoryServerConfigAction(ServerConfigManager serverConfigManager) {
+    public JfrogServerConfigAction(ServerConfigManager serverConfigManager) {
         this.serverConfigManager = serverConfigManager;
         mode = "add";
     }
@@ -190,7 +186,7 @@ public class ArtifactoryServerConfigAction extends BambooActionSupport implement
     }
 
     private void testConnection() {
-        try (ArtifactoryManager manager = new ArtifactoryManager(url + "/artifactory", username, password, new BuildLog(log))) {
+        try (ArtifactoryManager manager = new ArtifactoryManager(url + "/artifactory", username, password, accessToken, new BuildLog(log))) {
             ArtifactoryVersion rtVersion = manager.getVersion();
             if (rtVersion == null || rtVersion.equals(ArtifactoryVersion.NOT_FOUND)){
                 addActionError("Couldn't reach JFrog Artifactory server");
