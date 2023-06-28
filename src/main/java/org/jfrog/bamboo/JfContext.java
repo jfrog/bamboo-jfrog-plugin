@@ -4,17 +4,12 @@ package org.jfrog.bamboo;
 import com.atlassian.bamboo.collections.ActionParametersMap;
 import com.atlassian.bamboo.task.*;
 import com.atlassian.bamboo.utils.error.ErrorCollection;
-import com.atlassian.bamboo.ww2.BambooActionSupport;
-import com.opensymphony.xwork2.Action;
+import org.jfrog.bamboo.config.ServerConfigManager;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jfrog.bamboo.config.ServerConfigManager;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import static java.lang.String.format;
 

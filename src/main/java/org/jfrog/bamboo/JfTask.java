@@ -5,21 +5,20 @@ import com.atlassian.bamboo.configuration.AdministrationConfiguration;
 import com.atlassian.bamboo.configuration.AdministrationConfigurationAccessor;
 import com.atlassian.bamboo.configuration.ConfigurationMap;
 import com.atlassian.bamboo.task.*;
-import com.atlassian.bamboo.utils.EscapeChars;
 import com.atlassian.bamboo.v2.build.BuildContext;
+import com.atlassian.bamboo.v2.build.agent.capability.AgentContext;
 import com.atlassian.bamboo.variable.CustomVariableContext;
 import com.atlassian.plugin.PluginAccessor;
-import com.rometools.utils.Strings;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 import org.jfrog.bamboo.config.ServerConfig;
 import org.jfrog.bamboo.config.ServerConfigManager;
 import org.jfrog.bamboo.utils.BambooUtils;
 import org.jfrog.bamboo.utils.BuildLog;
 import org.jfrog.bamboo.utils.ExecutableRunner;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.*;
@@ -33,7 +32,6 @@ public class JfTask extends JfContext implements TaskType {
     private ExecutableRunner commandRunner;
     protected CustomVariableContext customVariableContext;
     protected PluginAccessor pluginAccessor;
-
     protected AdministrationConfiguration administrationConfiguration;
     protected AdministrationConfigurationAccessor administrationConfigurationAccessor;
 
@@ -43,6 +41,7 @@ public class JfTask extends JfContext implements TaskType {
         serverConfigManager = ServerConfigManager.getInstance();
         ConfigurationMap confMap = taskContext.getConfigurationMap();
         String serverId = confMap.get(JF_TASK_SERVER_ID);
+
         try {
             // Download CLI (if needed) and retrieve path
             String jfExecutablePath = JfInstaller.getJfExecutable("", buildLog);
@@ -52,7 +51,6 @@ public class JfTask extends JfContext implements TaskType {
 
             // Run 'jf config add' and 'jf config use' commands.
             runJFrogCliConfigAddCommand(serverId);
-
             // Running JFrog CLI command
             String cliCommand = confMap.get(JF_TASK_COMMAND);
             String[] splitArgs = cliCommand.trim().split(" ");
@@ -79,6 +77,7 @@ public class JfTask extends JfContext implements TaskType {
 
         String fullBuildKey = buildContext.getResultKey().getKey();
         environmentVariables.put("JFROG_CLI_HOME_DIR", BambooUtils.getJfrogSpecificBuildTmp(customVariableContext, fullBuildKey));
+
         String buildUrl = BambooUtils.createBambooBuildUrl(fullBuildKey, administrationConfiguration, administrationConfigurationAccessor);
         environmentVariables.put("JFROG_CLI_BUILD_URL", buildUrl);
 
