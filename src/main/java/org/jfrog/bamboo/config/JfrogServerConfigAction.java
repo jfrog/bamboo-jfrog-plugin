@@ -51,6 +51,9 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
     @Override
     public void validate() {
         clearErrorsAndMessages();
+        if (StringUtils.isBlank(serverId)) {
+            addFieldError("url", "Please specify a Server ID identifier.");
+        }
         if (mode.equals("add") && serverConfigManager.getServerConfigById(serverId) != null) {
             addFieldError("serverId", "Server ID already exists.");
         }

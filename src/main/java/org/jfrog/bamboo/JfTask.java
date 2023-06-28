@@ -50,7 +50,11 @@ public class JfTask extends JfContext implements TaskType {
             commandRunner = new ExecutableRunner(jfExecutablePath, taskContext.getWorkingDirectory(), createJfrogEnvironmentVariables(taskContext.getBuildContext(), serverId), buildLog);
 
             // Run 'jf config add' and 'jf config use' commands.
-            runJFrogCliConfigAddCommand(serverId);
+            configAllJFrogServers();
+
+            // Make selected Server ID as default (by 'jf c use')
+            runJFrogCliConfigUseCommand(serverId);
+
             // Running JFrog CLI command
             String cliCommand = confMap.get(JF_TASK_COMMAND);
             String[] splitArgs = cliCommand.trim().split(" ");
@@ -91,30 +95,33 @@ public class JfTask extends JfContext implements TaskType {
         return environmentVariables;
     }
 
-    private void runJFrogCliConfigAddCommand(String serverId) throws IOException, InterruptedException {
-        ServerConfig selectedServerConfig = serverConfigManager.getServerConfigById(serverId);
-        if (selectedServerConfig == null) {
-            throw new IllegalArgumentException("Could not find JFrog server. Please check the JFrog server in the task configuration.");
+    private void configAllJFrogServers() throws IOException, InterruptedException {
+        for (ServerConfig serverConfig : serverConfigManager.getAllServerConfigs()) {
+            runJFrogCliConfigAddCommand(serverConfig);
         }
-        buildLog.info(format("Using ServerID: %s (%s)", serverId, selectedServerConfig.getUrl()));
+    }
 
+    private void runJFrogCliConfigAddCommand(ServerConfig serverConfig) throws IOException, InterruptedException {
         // Run 'jf config add' command to configure the server.
         List<String> configAddArgs = new ArrayList<>(List.of(
                 "config",
                 "add",
-                serverId,
-                "--url=" + selectedServerConfig.getUrl(),
+                serverConfig.getServerId(),
+                "--url=" + serverConfig.getUrl(),
                 "--interactive=false",
                 "--overwrite=true"
         ));
-        if (StringUtils.isNotEmpty(selectedServerConfig.getAccessToken())) {
-            configAddArgs.add("--access-token=" + selectedServerConfig.getAccessToken());
-        } else if (StringUtils.isNotEmpty(selectedServerConfig.getUsername()) && StringUtils.isNotEmpty(selectedServerConfig.getPassword())) {
-            configAddArgs.add("--user=" + selectedServerConfig.getUsername());
-            configAddArgs.add("--password=" + selectedServerConfig.getPassword());
+        if (StringUtils.isNotEmpty(serverConfig.getAccessToken())) {
+            configAddArgs.add("--access-token=" + serverConfig.getAccessToken());
+        } else if (StringUtils.isNotEmpty(serverConfig.getUsername()) && StringUtils.isNotEmpty(serverConfig.getPassword())) {
+            configAddArgs.add("--user=" + serverConfig.getUsername());
+            configAddArgs.add("--password=" + serverConfig.getPassword());
         }
         commandRunner.run(configAddArgs);
+    }
 
+    private void runJFrogCliConfigUseCommand(String serverId) throws IOException, InterruptedException {
+        buildLog.info("Using ServerID: " + serverId);
         // Run 'jf config use' command to make the previously configured server as default.
         List<String> configUseArgs = List.of("config", "use", serverId);
         commandRunner.run(configUseArgs);

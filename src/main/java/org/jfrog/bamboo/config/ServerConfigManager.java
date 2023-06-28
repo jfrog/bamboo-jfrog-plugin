@@ -36,7 +36,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -64,7 +63,7 @@ public class ServerConfigManager implements Serializable {
 
     public static ServerConfigManager getInstance() {
         ServerConfigManager serverConfigManager = new ServerConfigManager();
-        ContainerManager.autowireComponent(serverConfigManager);
+       // ContainerManager.autowireComponent(serverConfigManager);
         return serverConfigManager;
     }
 
