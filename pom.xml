@@ -41,7 +41,7 @@
         <java.version>11</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <buildinfo.version>2.40.0</buildinfo.version>
+        <buildinfo.version>2.41.1</buildinfo.version>
     </properties>
 
     <profiles>

@@ -13,6 +13,8 @@ import java.nio.file.Paths;
 
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import static java.lang.String.format;
+import static org.jfrog.build.client.DownloadResponse.SHA256_HEADER_NAME;
+
 public class JfInstaller {
     private static final String RELEASE = "[RELEASE]";
     public static final String RELEASES_ARTIFACTORY_URL = "https://releases.jfrog.io/artifactory";
@@ -60,7 +62,7 @@ public class JfInstaller {
         try (ArtifactoryManager manager = new ArtifactoryManager(RELEASES_ARTIFACTORY_URL, "", "", myBuildLog)) {
             String cliUrlSuffix = String.format("/%s/v2-jf/%s/jfrog-cli-%s/%s", REPOSITORY, version, OsUtils.getOsDetails(), binaryName);
             // Getting updated cli binary's sha256 form Artifactory.
-            String artifactorySha256 = getArtifactSha256(manager, cliUrlSuffix);
+            String artifactorySha256 = manager.downloadHeader(cliUrlSuffix, SHA256_HEADER_NAME);
             // Check whether it's needed to download a new executable, or it already exists on agent
             if (shouldDownloadTool(executableLocation, artifactorySha256)) {
                 if (version.equals(RELEASE)) {
@@ -73,8 +75,7 @@ public class JfInstaller {
                     throw new IOException("No permission to add execution permission to binary");
                 }
                 myBuildLog.info("Successfully downloaded JFrog cli executable: " + downloadResponse.getPath());
-                createSha256File(executableLocation
-                        , artifactorySha256);
+                createSha256File(executableLocation, artifactorySha256);
             } else {
                 myBuildLog.info("Found existing JFrog CLI executable");
             }
@@ -84,27 +85,7 @@ public class JfInstaller {
         }
     }
 
-    /**
-     * Send REST request to Artifactory to get binary's sha256.
-     *
-     * @param manager      - internal Artifactory Java manager.
-     * @param cliUrlSuffix - path to the specific JFrog CLI version in Artifactory, will be sent to Artifactory in the request.
-     * @return binary's sha256
-     * @throws IOException in case of any I/O error.
-     */
-    private static String getArtifactSha256(ArtifactoryManager manager, String cliUrlSuffix) throws IOException {
-        // todo:
-        // Header[] headers = manager.downloadHeaders(cliUrlSuffix);
-        // for (Header header : headers) {
-            //     if (header.getName().equals(SHA256_HEADER_NAME)) {
-                //         return header.getValue();
-                //     }
-            // }
-        // return StringUtils.EMPTY;
-        return "shaaaaaa";
-    }
-
-    /**
+     /**
      * We should skip the download if the tool's directory already contains the specific version, otherwise we should download it.
      * A file named 'sha256' contains the specific binary sha256.
      * If the file sha256 has not changed, we will skip the download, otherwise we will download and overwrite the existing files.
@@ -122,7 +103,7 @@ public class JfInstaller {
         if (!Files.exists(path)) {
             return true;
         }
-        String fileContent = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+        String fileContent = Files.readString(path);
         return !StringUtils.equals(fileContent, artifactorySha256);
     }
 
