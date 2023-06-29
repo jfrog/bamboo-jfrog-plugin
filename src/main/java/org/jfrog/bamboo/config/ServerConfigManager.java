@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jfrog.bamboo.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -51,7 +52,7 @@ public class ServerConfigManager implements Serializable {
     private static final String JFROG_CONFIG_KEY = "org.jfrog.bamboo.server.config";
     private final List<ServerConfig> configuredServers = new CopyOnWriteArrayList<>();
     private BandanaManager bandanaManager = null;
-    private final ObjectMapper mapper = createMapper();
+    private final ObjectMapper mapper = Utils.createMapper();
 
     public List<ServerConfig> getAllServerConfigs() {
         return new ArrayList<>(configuredServers);
@@ -165,13 +166,5 @@ public class ServerConfigManager implements Serializable {
         }
         String serverConfigsString = mapper.writeValueAsString(serverConfigs);
         bandanaManager.setValue(PlanAwareBandanaContext.GLOBAL_CONTEXT, JFROG_CONFIG_KEY, serverConfigsString);
-    }
-
-    public static ObjectMapper createMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        return mapper;
     }
 }
