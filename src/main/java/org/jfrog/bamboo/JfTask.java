@@ -72,22 +72,30 @@ public class JfTask extends JfContext implements TaskType {
     }
 
     private Map<String, String> createJfrogEnvironmentVariables(BuildContext buildContext, String serverId) throws IOException {
-        Map<String, String> environmentVariables = new HashMap<>();
-        environmentVariables.put("JFROG_CLI_SERVER_ID", serverId);
-        environmentVariables.put("JFROG_CLI_BUILD_NAME", buildContext.getPlanName());
-        environmentVariables.put("JFROG_CLI_BUILD_NUMBER", String.valueOf(buildContext.getBuildNumber()));
+        Map<String, String> jfEnvs = new HashMap<>() {
+            public String put(String key, String value) {
+                if (StringUtils.isBlank(System.getProperty(key))) {
+                    return super.put(key, value);
+                }
+                return "";
+            }
+        };
+
+        jfEnvs.put("JFROG_CLI_SERVER_ID", serverId);
+        jfEnvs.put("JFROG_CLI_BUILD_NAME", buildContext.getPlanName());
+        jfEnvs.put("JFROG_CLI_BUILD_NUMBER", String.valueOf(buildContext.getBuildNumber()));
 
         String fullBuildKey = buildContext.getResultKey().getKey();
-        environmentVariables.put("JFROG_CLI_HOME_DIR", BambooUtils.getJfrogSpecificBuildTmp(customVariableContext, fullBuildKey));
+        jfEnvs.put("JFROG_CLI_HOME_DIR", BambooUtils.getJfrogSpecificBuildTmp(customVariableContext, fullBuildKey));
 
         String buildUrl = BambooUtils.createBambooBuildUrl(fullBuildKey, administrationConfiguration, administrationConfigurationAccessor);
-        environmentVariables.put("JFROG_CLI_BUILD_URL", buildUrl);
+        jfEnvs.put("JFROG_CLI_BUILD_URL", buildUrl);
 
-        environmentVariables.put("JFROG_CLI_USER_AGENT", BambooUtils.getJFrogPluginIdentifier(pluginAccessor));
-        environmentVariables.put("JFROG_CLI_LOG_TIMESTAMP", "OFF");
+        jfEnvs.put("JFROG_CLI_USER_AGENT", BambooUtils.getJFrogPluginIdentifier(pluginAccessor));
+        jfEnvs.put("JFROG_CLI_LOG_TIMESTAMP", "OFF");
 
-        buildLog.info("The following environment variables will be used: " + environmentVariables);
-        return environmentVariables;
+        buildLog.info("The following environment variables will be used: " + jfEnvs);
+        return jfEnvs;
     }
 
     private void configAllJFrogServers() throws IOException, InterruptedException {
