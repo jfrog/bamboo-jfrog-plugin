@@ -131,7 +131,7 @@ public class EncryptionHelper {
         return encrypter;
     }
 
-    private static ThreadLocal<Cipher> threadLocalEncrypter = ThreadLocal.withInitial(() -> {
+    private static final ThreadLocal<Cipher> threadLocalEncrypter = ThreadLocal.withInitial(() -> {
         try {
             return Cipher.getInstance(DESEDE_ENCRYPTION_SCHEME);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
@@ -140,7 +140,7 @@ public class EncryptionHelper {
         return null;
     });
 
-    private static ThreadLocal<Cipher> threadLocalDecrypter = ThreadLocal.withInitial(() -> {
+    private static final ThreadLocal<Cipher> threadLocalDecrypter = ThreadLocal.withInitial(() -> {
         try {
             return Cipher.getInstance(DESEDE_ENCRYPTION_SCHEME);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {

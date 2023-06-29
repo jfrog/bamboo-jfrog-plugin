@@ -4,7 +4,10 @@ package org.jfrog.bamboo;
 import com.atlassian.bamboo.configuration.AdministrationConfiguration;
 import com.atlassian.bamboo.configuration.AdministrationConfigurationAccessor;
 import com.atlassian.bamboo.configuration.ConfigurationMap;
-import com.atlassian.bamboo.task.*;
+import com.atlassian.bamboo.task.TaskContext;
+import com.atlassian.bamboo.task.TaskResult;
+import com.atlassian.bamboo.task.TaskResultBuilder;
+import com.atlassian.bamboo.task.TaskType;
 import com.atlassian.bamboo.v2.build.BuildContext;
 import com.atlassian.bamboo.variable.CustomVariableContext;
 import com.atlassian.plugin.PluginAccessor;
@@ -33,7 +36,7 @@ public class JfTask extends JfContext implements TaskType {
     protected AdministrationConfigurationAccessor administrationConfigurationAccessor;
 
     @Override
-    public @NotNull TaskResult execute(final @NotNull TaskContext taskContext) throws TaskException {
+    public @NotNull TaskResult execute(final @NotNull TaskContext taskContext) {
         buildLog = new BuildLog(log, taskContext.getBuildLogger());
         serverConfigManager = ServerConfigManager.getInstance();
         ConfigurationMap confMap = taskContext.getConfigurationMap();

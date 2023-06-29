@@ -30,14 +30,17 @@ public class ExistingServersListAction extends AbstractEntityPagerSupport implem
         this.serverConfigManager = serverConfigManager;
     }
 
+    @SuppressWarnings("unused")
     public String doBrowse() throws Exception {
         return super.execute();
     }
 
+    @SuppressWarnings("unused")
     public String browse() throws Exception {
         return super.execute();
     }
 
+    @SuppressWarnings("unused")
     public List<ServerConfig> getServerConfigs() {
         return serverConfigManager.getAllServerConfigs();
     }

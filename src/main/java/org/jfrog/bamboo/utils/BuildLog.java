@@ -9,7 +9,6 @@ import org.apache.logging.log4j.Logger;
 public class BuildLog implements org.jfrog.build.api.util.Log {
     private final Logger log;
     private BuildLogger buildLogger;
-    private final String JFROG_PREFIX = "[JFrog Plugin] ";
 
     public BuildLog(Logger log) {
         this.log = log;
@@ -21,6 +20,7 @@ public class BuildLog implements org.jfrog.build.api.util.Log {
     }
 
     private String addPrefix(String message) {
+        String JFROG_PREFIX = "[JFrog Plugin] ";
         return JFROG_PREFIX + message;
     }
 

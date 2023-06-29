@@ -78,12 +78,12 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
     }
 
     @SuppressWarnings("unused")
-    public String doAdd() throws Exception {
+    public String doAdd() {
         return INPUT;
     }
 
     @SuppressWarnings("unused")
-    public String doCreate() throws Exception {
+    public String doCreate() {
         if (isTesting()) {
             testConnection();
             return INPUT;
@@ -95,7 +95,7 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
     }
 
     @SuppressWarnings("unused")
-    public String doEdit() throws Exception {
+    public String doEdit() throws IllegalArgumentException {
         ServerConfig serverConfig = serverConfigManager.getServerConfigById(serverId);
         if (serverConfig == null) {
             throw new IllegalArgumentException("Could not find Artifactory server configuration by the ID " + serverId);
@@ -106,7 +106,7 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
 
 
     @SuppressWarnings("unused")
-    public String doUpdate() throws Exception {
+    public String doUpdate() {
         // Decrypt password from UI, if encrypted.
         password = EncryptionHelper.decryptIfNeeded(password);
         accessToken = EncryptionHelper.decryptIfNeeded(accessToken);
@@ -123,7 +123,7 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
     }
 
     @SuppressWarnings("unused")
-    public String doDelete() throws Exception {
+    public String doDelete() {
         serverConfigManager.deleteServerConfiguration(getServerId());
         return SUCCESS;
     }
@@ -139,7 +139,7 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
     }
 
     @SuppressWarnings("unused")
-    public String confirm() throws Exception {
+    public String confirm() {
         return SUCCESS;
     }
 
