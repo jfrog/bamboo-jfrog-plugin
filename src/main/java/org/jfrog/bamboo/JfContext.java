@@ -2,16 +2,15 @@ package org.jfrog.bamboo;
 
 
 import com.atlassian.bamboo.collections.ActionParametersMap;
-import com.atlassian.bamboo.task.*;
+import com.atlassian.bamboo.task.AbstractTaskConfigurator;
+import com.atlassian.bamboo.task.TaskDefinition;
 import com.atlassian.bamboo.utils.error.ErrorCollection;
-import org.jfrog.bamboo.config.ServerConfigManager;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jfrog.bamboo.config.ServerConfigManager;
 
 import java.util.Map;
-
-import static java.lang.String.format;
 
 public class JfContext extends AbstractTaskConfigurator {
     protected transient ServerConfigManager serverConfigManager;
@@ -53,7 +52,7 @@ public class JfContext extends AbstractTaskConfigurator {
     public void validate(@NotNull ActionParametersMap params, @NotNull ErrorCollection errorCollection) {
         super.validate(params, errorCollection);
         String cliCommand = params.getString(JF_TASK_COMMAND);
-        if (!StringUtils.startsWithIgnoreCase(cliCommand.trim(), "jf ")){
+        if (!StringUtils.startsWithIgnoreCase(cliCommand.trim(), "jf ")) {
             errorCollection.addErrorMessage("JFrog CLI command should start with 'jf '");
         }
     }

@@ -3,15 +3,12 @@ package org.jfrog.bamboo.utils;
 import com.atlassian.bamboo.configuration.AdministrationConfiguration;
 import com.atlassian.bamboo.configuration.AdministrationConfigurationAccessor;
 import com.atlassian.bamboo.utils.EscapeChars;
-import com.atlassian.bamboo.v2.build.BuildContext;
 import com.atlassian.bamboo.variable.CustomVariableContext;
 import com.atlassian.plugin.Plugin;
 import com.atlassian.plugin.PluginAccessor;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class BambooUtils {
@@ -31,7 +28,7 @@ public class BambooUtils {
      * Example - '~/bamboo-agent-home/temp/jfrog/MYP-CLIP-JOB1-16'
      *
      * @param customVariableContext - Task custom variables
-     * @param fullBuildKey         - The full build key.
+     * @param fullBuildKey          - The full build key.
      * @return JFrog specific Build folder
      */
     public static String getJfrogSpecificBuildTmp(CustomVariableContext customVariableContext, String fullBuildKey) throws IOException {

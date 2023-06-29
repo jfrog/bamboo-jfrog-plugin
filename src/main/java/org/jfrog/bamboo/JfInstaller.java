@@ -3,6 +3,7 @@ package org.jfrog.bamboo;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.bamboo.utils.BuildLog;
 import org.jfrog.bamboo.utils.OsUtils;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,7 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import static java.lang.String.format;
 import static org.jfrog.build.client.DownloadResponse.SHA256_HEADER_NAME;
 
@@ -85,7 +85,7 @@ public class JfInstaller {
         }
     }
 
-     /**
+    /**
      * We should skip the download if the tool's directory already contains the specific version, otherwise we should download it.
      * A file named 'sha256' contains the specific binary sha256.
      * If the file sha256 has not changed, we will skip the download, otherwise we will download and overwrite the existing files.

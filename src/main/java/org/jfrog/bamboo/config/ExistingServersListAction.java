@@ -24,26 +24,26 @@ import java.util.List;
 
 public class ExistingServersListAction extends AbstractEntityPagerSupport implements GlobalAdminSecurityAware {
 
-	private ServerConfigManager serverConfigManager;
+    private ServerConfigManager serverConfigManager;
 
-	public ExistingServersListAction(ServerConfigManager serverConfigManager) {
-		this.serverConfigManager = serverConfigManager;
-	}
+    public ExistingServersListAction(ServerConfigManager serverConfigManager) {
+        this.serverConfigManager = serverConfigManager;
+    }
 
-	public String doBrowse() throws Exception {
-		return super.execute();
-	}
+    public String doBrowse() throws Exception {
+        return super.execute();
+    }
 
-	public String browse() throws Exception {
-		return super.execute();
-	}
+    public String browse() throws Exception {
+        return super.execute();
+    }
 
-	public List<ServerConfig> getServerConfigs() {
-		return serverConfigManager.getAllServerConfigs();
-	}
+    public List<ServerConfig> getServerConfigs() {
+        return serverConfigManager.getAllServerConfigs();
+    }
 
-	@Override
-	public Object getSecuredDomainObject() {
-		return GlobalApplicationSecureObject.INSTANCE;
-	}
+    @Override
+    public Object getSecuredDomainObject() {
+        return GlobalApplicationSecureObject.INSTANCE;
+    }
 }

@@ -69,9 +69,9 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
             }
         }
 
-        if (StringUtils.isNotBlank(username) && StringUtils.isBlank(password)){
+        if (StringUtils.isNotBlank(username) && StringUtils.isBlank(password)) {
             addFieldError("password", "Please specify the password of your JFrog Platform.");
-        } else if (StringUtils.isBlank(username) && StringUtils.isNotBlank(password)){
+        } else if (StringUtils.isBlank(username) && StringUtils.isNotBlank(password)) {
             addFieldError("username", "Please specify the username of your JFrog Platform.");
         }
     }
@@ -98,7 +98,7 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
         }
         updateFieldsFromServerConfig(serverConfig);
         return INPUT;
-   }
+    }
 
 
     public String doUpdate() throws Exception {
@@ -197,7 +197,7 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
     private void testConnection() {
         try (ArtifactoryManager manager = new ArtifactoryManager(url + "/artifactory", username, password, accessToken, new BuildLog(log))) {
             ArtifactoryVersion rtVersion = manager.getVersion();
-            if (rtVersion == null || rtVersion.equals(ArtifactoryVersion.NOT_FOUND)){
+            if (rtVersion == null || rtVersion.equals(ArtifactoryVersion.NOT_FOUND)) {
                 addActionError("Couldn't reach JFrog Artifactory server");
             }
             addActionMessage("Connection successful! JFrog Artifactory version: " + rtVersion);

@@ -20,6 +20,6 @@ import com.atlassian.bamboo.configuration.GlobalAdminAction;
 import com.atlassian.bamboo.ww2.aware.permissions.GlobalAdminSecurityAware;
 
 public class JfrogConfigurationAction extends GlobalAdminAction implements GlobalAdminSecurityAware {
-	public JfrogConfigurationAction() {
-	}
+    public JfrogConfigurationAction() {
+    }
 }

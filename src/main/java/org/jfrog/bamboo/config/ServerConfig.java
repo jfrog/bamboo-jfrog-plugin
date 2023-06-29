@@ -20,6 +20,6 @@ public class ServerConfig implements Serializable {
 
     @Override
     public String toString() {
-        return format("%s (%s)", serverId , url);
+        return format("%s (%s)", serverId, url);
     }
 }

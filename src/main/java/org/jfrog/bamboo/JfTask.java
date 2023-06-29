@@ -6,24 +6,21 @@ import com.atlassian.bamboo.configuration.AdministrationConfigurationAccessor;
 import com.atlassian.bamboo.configuration.ConfigurationMap;
 import com.atlassian.bamboo.task.*;
 import com.atlassian.bamboo.v2.build.BuildContext;
-import com.atlassian.bamboo.v2.build.agent.capability.AgentContext;
 import com.atlassian.bamboo.variable.CustomVariableContext;
 import com.atlassian.plugin.PluginAccessor;
-import org.jfrog.bamboo.config.ServerConfig;
-import org.jfrog.bamboo.config.ServerConfigManager;
-import org.jfrog.bamboo.utils.BambooUtils;
-import org.jfrog.bamboo.utils.BuildLog;
-import org.jfrog.bamboo.utils.ExecutableRunner;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jfrog.bamboo.config.ServerConfig;
+import org.jfrog.bamboo.config.ServerConfigManager;
+import org.jfrog.bamboo.utils.BambooUtils;
+import org.jfrog.bamboo.utils.BuildLog;
+import org.jfrog.bamboo.utils.ExecutableRunner;
 
 import java.io.IOException;
 import java.util.*;
-
-import static java.lang.String.format;
 
 public class JfTask extends JfContext implements TaskType {
     protected static final Logger log = LogManager.getLogger(JfTask.class);

@@ -28,22 +28,22 @@ showActionErrors='true'
     [@ui.bambooSection]
 
         [@ww.textfield
-            label='Server ID'
-            description='Please specify a Server ID (name) to identify this server configuration'
-            required="true"
-            name="serverId"
-            autofocus=true
+        label='Server ID'
+        description='Please specify a Server ID (name) to identify this server configuration'
+        required="true"
+        name="serverId"
+        autofocus=true
         /]
 
         [@ww.textfield
-            label='JFrog Platform URL'
-            description='Please enter your JFrog Platform URL (example: https://acme.jfrog.io)'
-            name="url"
-            required="true"
+        label='JFrog Platform URL'
+        description='Please enter your JFrog Platform URL (example: https://acme.jfrog.io)'
+        name="url"
+        required="true"
         /]
 
-       [@ww.radio fieldValue='token' label="Access Token" name='authentication' toggle='true' template='radio.ftl' /]
-       [@ww.radio fieldValue='basic' label="Basic Authentication" name='authentication' toggle='true' template='radio.ftl'/]
+        [@ww.radio fieldValue='token' label="Access Token" name='authentication' toggle='true' template='radio.ftl' /]
+        [@ww.radio fieldValue='basic' label="Basic Authentication" name='authentication' toggle='true' template='radio.ftl'/]
 
         [@ui.bambooSection dependsOn='authentication' showOn='token']
             [@ww.password label='Access Token' name="accessToken" showPassword='true'/]

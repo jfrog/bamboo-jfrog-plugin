@@ -11,7 +11,7 @@ public class ExecutableRunner {
     private final Map<String, String> envs;
     private final BuildLog buildLog;
 
-    public ExecutableRunner(String executable, File workingDir, Map<String, String> envs, BuildLog buildLog ){
+    public ExecutableRunner(String executable, File workingDir, Map<String, String> envs, BuildLog buildLog) {
         this.executable = executable;
         this.workingDir = workingDir;
         this.envs = envs;

@@ -14,6 +14,7 @@ public class BuildLog implements org.jfrog.build.api.util.Log {
     public BuildLog(Logger log) {
         this.log = log;
     }
+
     public BuildLog(Logger log, BuildLogger buildLogger) {
         this.log = log;
         this.buildLogger = buildLogger;

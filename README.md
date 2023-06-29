@@ -6,7 +6,6 @@
 
 </div>
 
-
 ## Table of Contents
 
 - [Overview](#Overview)
@@ -17,11 +16,16 @@
 
 ## Overview
 
-The **Bamboo JFrog Plugin** is designed to provide an easy integration between Bamboo and the [JFrog Platform](https://jfrog.com/solution-sheet/jfrog-platform/).
-Unlike the [Bamboo Artifactory Plugin](https://plugins.atlassian.com/plugin/details/27818), the new **Bamboo JFrog Plugin** focuses on a single task that runs [JFrog CLI](https://jfrog.com/help/r/jfrog-cli/jfrog-cli) commands.
-The advantage of this approach is that JFrog CLI is a powerful and versatile tool that integrates with all JFrog capabilities.
-It offers extensive features and functionalities, and it is constantly improved and updated with the latest enhancements from JFrog.
-This ensures that the Bamboo JFrog Plugin is always up-to-date with the newest features and improvements provided by JFrog.
+The **Bamboo JFrog Plugin** is designed to provide an easy integration between Bamboo and
+the [JFrog Platform](https://jfrog.com/solution-sheet/jfrog-platform/).
+Unlike the [Bamboo Artifactory Plugin](https://plugins.atlassian.com/plugin/details/27818), the new **Bamboo JFrog
+Plugin** focuses on a single task that runs [JFrog CLI](https://jfrog.com/help/r/jfrog-cli/jfrog-cli) commands.
+The advantage of this approach is that JFrog CLI is a powerful and versatile tool that integrates with all JFrog
+capabilities.
+It offers extensive features and functionalities, and it is constantly improved and updated with the latest enhancements
+from JFrog.
+This ensures that the Bamboo JFrog Plugin is always up-to-date with the newest features and improvements provided by
+JFrog.
 
 This integration allows your build jobs to deploy artifacts and resolve dependencies to and
 from [Artifactory](https://jfrog.com/artifactory/), and then have them linked to the build job that created them.

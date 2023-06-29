@@ -6,8 +6,8 @@
 
 <body>
 <div>
-[@ui.header pageKey="JFrog Plugin Configuration" /]
-<br/>
+    [@ui.header pageKey="JFrog Plugin Configuration" /]
+    <br/>
 </div>
 [@ww.action name="existingServersList" executeResult="true"/]
 </body>

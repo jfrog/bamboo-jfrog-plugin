@@ -2,7 +2,7 @@
     <plugin-info>
         <description>${project.description}</description>
         <version>${project.version}</version>
-        <vendor name="JFrog" url="https://www.jfrog.com" />
+        <vendor name="JFrog" url="https://www.jfrog.com"/>
         <param name="plugin-icon">images/jfrogLogo.png</param>
         <param name="plugin-logo">images/jfrogLogo.png</param>
         <param name="configure.url">/admin/jfrogConfiguration.action</param>
@@ -42,7 +42,8 @@
             </action>
 
             <!-- JFrog Configurations -->
-            <action name="existingServersList" class="org.jfrog.bamboo.config.ExistingServersListAction" method="browse">
+            <action name="existingServersList" class="org.jfrog.bamboo.config.ExistingServersListAction"
+                    method="browse">
                 <result name="success" type="freemarker">/templates/viewExistingServersList.ftl</result>
             </action>
 
@@ -70,8 +71,8 @@
             </action>
 
             <action name="confirmDeleteServer" class="org.jfrog.bamboo.config.JfrogServerConfigAction" method="confirm">
-                <result name="input" type="freemarker" >/templates/confirmDeleteServer.ftl</result>
-                <result name="success" type="freemarker" >/templates/confirmDeleteServer.ftl</result>
+                <result name="input" type="freemarker">/templates/confirmDeleteServer.ftl</result>
+                <result name="success" type="freemarker">/templates/confirmDeleteServer.ftl</result>
             </action>
 
             <action name="deleteServer" class="org.jfrog.bamboo.config.JfrogServerConfigAction" method="delete">
