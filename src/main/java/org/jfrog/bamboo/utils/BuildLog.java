@@ -4,7 +4,7 @@ import com.atlassian.bamboo.build.logger.BuildLogger;
 import org.apache.logging.log4j.Logger;
 
 /**
- * Wrapper for Jenkins build logger, records log messages from BuildInfo
+ * Wrapper for Bamboo build logger, records log messages from BuildInfo
  */
 public class BuildLog implements org.jfrog.build.api.util.Log {
     private final Logger log;

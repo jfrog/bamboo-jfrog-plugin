@@ -9,7 +9,6 @@ import org.jfrog.bamboo.utils.BambooUtils;
 
 import java.io.IOException;
 
-
 public class PostBuildAction implements CustomPostBuildCompletedAction {
     private BuildContext buildContext;
     private CustomVariableContext customVariableContext;

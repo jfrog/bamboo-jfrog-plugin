@@ -29,7 +29,7 @@ pipelines:
             # Set env
             - export CI=true
             - export JFROG_BUILD_STATUS=PASS
-            - export JFROG_CLI_BUILD_NAME=ecosystem-artifactory-bamboo-plugin-release
+            - export JFROG_CLI_BUILD_NAME=ecosystem-jfrog-bamboo-plugin-release
             - export JFROG_CLI_BUILD_NUMBER=$run_number
             - export JFROG_CLI_BUILD_PROJECT=ecosys
 

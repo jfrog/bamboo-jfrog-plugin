@@ -4,15 +4,8 @@ import org.apache.commons.lang.SystemUtils;
 
 import java.io.IOException;
 
-/**
- * @author michaels
- */
 public class OsUtils {
     private static final String OS_ARCH = System.getProperty("os.arch").toLowerCase();
-
-    public static boolean isUnix() {
-        return SystemUtils.IS_OS_UNIX;
-    }
 
     public static boolean isWindows() {
         return SystemUtils.IS_OS_WINDOWS;

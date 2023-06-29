@@ -30,7 +30,6 @@ public class JfInstaller {
         return BINARY_NAME;
     }
 
-
     /**
      * Returns the directory path where the JFrog executable is located based on the specified version.
      * If the version is "RELEASE", the path points to the base JFrog directory.

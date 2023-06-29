@@ -35,7 +35,6 @@ public class JfContext extends AbstractTaskConfigurator {
         context.put("serverConfigManager", ServerConfigManager.getInstance());
     }
 
-
     @Override
     @NotNull
     public Map<String, String> generateTaskConfigMap(
@@ -52,7 +51,7 @@ public class JfContext extends AbstractTaskConfigurator {
     public void validate(@NotNull ActionParametersMap params, @NotNull ErrorCollection errorCollection) {
         super.validate(params, errorCollection);
         String cliCommand = params.getString(JF_TASK_COMMAND);
-        if (!StringUtils.startsWithIgnoreCase(cliCommand.trim(), "jf ")) {
+        if (!StringUtils.startsWith(StringUtils.trim(cliCommand), "jf ")) {
             errorCollection.addErrorMessage("JFrog CLI command should start with 'jf '");
         }
     }

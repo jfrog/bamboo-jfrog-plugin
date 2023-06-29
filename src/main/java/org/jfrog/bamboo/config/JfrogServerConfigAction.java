@@ -19,6 +19,7 @@ package org.jfrog.bamboo.config;
 import com.atlassian.bamboo.ww2.BambooActionSupport;
 import com.atlassian.bamboo.ww2.aware.permissions.GlobalAdminSecurityAware;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -65,7 +66,7 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
             try {
                 new URL(url);
             } catch (MalformedURLException mue) {
-                addFieldError("url", "Please specify a valid URL of a JFrog Platform.");
+                addFieldError("url", "Please specify a valid URL of a JFrog Platform. " + ExceptionUtils.getRootCauseMessage(mue));
             }
         }
 
@@ -76,10 +77,12 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
         }
     }
 
+    @SuppressWarnings("unused")
     public String doAdd() throws Exception {
         return INPUT;
     }
 
+    @SuppressWarnings("unused")
     public String doCreate() throws Exception {
         if (isTesting()) {
             testConnection();
@@ -91,6 +94,7 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
         return SUCCESS;
     }
 
+    @SuppressWarnings("unused")
     public String doEdit() throws Exception {
         ServerConfig serverConfig = serverConfigManager.getServerConfigById(serverId);
         if (serverConfig == null) {
@@ -101,6 +105,7 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
     }
 
 
+    @SuppressWarnings("unused")
     public String doUpdate() throws Exception {
         // Decrypt password from UI, if encrypted.
         password = EncryptionHelper.decryptIfNeeded(password);
@@ -117,27 +122,33 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
         return SUCCESS;
     }
 
+    @SuppressWarnings("unused")
     public String doDelete() throws Exception {
         serverConfigManager.deleteServerConfiguration(getServerId());
         return SUCCESS;
     }
 
+    @SuppressWarnings("unused")
     public String doBrowse() throws Exception {
         return super.execute();
     }
 
+    @SuppressWarnings("unused")
     public String browse() throws Exception {
         return super.execute();
     }
 
+    @SuppressWarnings("unused")
     public String confirm() throws Exception {
         return SUCCESS;
     }
 
+    @SuppressWarnings("unused")
     public String getMode() {
         return mode;
     }
 
+    @SuppressWarnings("unused")
     public void setMode(String mode) {
         this.mode = mode;
     }
@@ -186,10 +197,12 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
         this.accessToken = accessToken;
     }
 
+    @SuppressWarnings("unused")
     public String getIsSendTest() {
         return isSendTest;
     }
 
+    @SuppressWarnings("unused")
     public void setSendTest(String sendTest) {
         isSendTest = sendTest;
     }

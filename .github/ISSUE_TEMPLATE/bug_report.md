@@ -21,7 +21,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Versions**
 
-- Bamboo Artifactory plugin version:
+- Bamboo JFrog plugin version:
 - Bamboo operating system:
 - Artifactory Version:
 

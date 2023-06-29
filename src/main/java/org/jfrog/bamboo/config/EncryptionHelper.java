@@ -17,9 +17,6 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 
-/**
- * Created by diman on 07/03/2017.
- */
 @ThreadSafe
 public class EncryptionHelper {
 
@@ -134,27 +131,21 @@ public class EncryptionHelper {
         return encrypter;
     }
 
-    private static ThreadLocal<Cipher> threadLocalEncrypter = new ThreadLocal<Cipher>() {
-        @Override
-        protected Cipher initialValue() {
-            try {
-                return Cipher.getInstance(DESEDE_ENCRYPTION_SCHEME);
-            } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-                log.error("Cannot create encrypter", e);
-            }
-            return null;
+    private static ThreadLocal<Cipher> threadLocalEncrypter = ThreadLocal.withInitial(() -> {
+        try {
+            return Cipher.getInstance(DESEDE_ENCRYPTION_SCHEME);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+            log.error("Cannot create encrypter", e);
         }
-    };
+        return null;
+    });
 
-    private static ThreadLocal<Cipher> threadLocalDecrypter = new ThreadLocal<Cipher>() {
-        @Override
-        protected Cipher initialValue() {
-            try {
-                return Cipher.getInstance(DESEDE_ENCRYPTION_SCHEME);
-            } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-                log.error("Cannot create decrypter", e);
-            }
-            return null;
+    private static ThreadLocal<Cipher> threadLocalDecrypter = ThreadLocal.withInitial(() -> {
+        try {
+            return Cipher.getInstance(DESEDE_ENCRYPTION_SCHEME);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+            log.error("Cannot create decrypter", e);
         }
-    };
+        return null;
+    });
 }

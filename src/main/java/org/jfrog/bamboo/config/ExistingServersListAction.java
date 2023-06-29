@@ -24,7 +24,7 @@ import java.util.List;
 
 public class ExistingServersListAction extends AbstractEntityPagerSupport implements GlobalAdminSecurityAware {
 
-    private ServerConfigManager serverConfigManager;
+    private final ServerConfigManager serverConfigManager;
 
     public ExistingServersListAction(ServerConfigManager serverConfigManager) {
         this.serverConfigManager = serverConfigManager;
