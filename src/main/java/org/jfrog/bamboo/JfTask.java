@@ -40,7 +40,7 @@ public class JfTask extends JfContext implements TaskType {
         buildLog = new BuildLog(log, taskContext.getBuildLogger());
         serverConfigManager = ServerConfigManager.getInstance();
         ConfigurationMap confMap = taskContext.getConfigurationMap();
-
+        TaskResultBuilder resultBuilder = TaskResultBuilder.newBuilder(taskContext);
         try {
             // Download CLI (if needed) and retrieve path
             String jfExecutablePath = JfInstaller.getJfExecutable("", buildLog);
@@ -69,9 +69,9 @@ public class JfTask extends JfContext implements TaskType {
 
         } catch (IOException | InterruptedException e) {
             buildLog.error(e + "\n" + ExceptionUtils.getStackTrace(e));
-            return TaskResultBuilder.newBuilder(taskContext).failedWithError().build();
+            return resultBuilder.failedWithError().build();
         }
-        return TaskResultBuilder.newBuilder(taskContext).success().build();
+        return resultBuilder.success().build();
     }
 
     private Map<String, String> createJfrogEnvironmentVariables(BuildContext buildContext, String serverId) throws IOException {
@@ -117,9 +117,9 @@ public class JfTask extends JfContext implements TaskType {
                 "--interactive=false",
                 "--overwrite=true"
         ));
-        if (StringUtils.isNotEmpty(serverConfig.getAccessToken())) {
+        if (StringUtils.isNotBlank(serverConfig.getAccessToken())) {
             configAddArgs.add("--access-token=" + serverConfig.getAccessToken());
-        } else if (StringUtils.isNotEmpty(serverConfig.getUsername()) && StringUtils.isNotEmpty(serverConfig.getPassword())) {
+        } else if (StringUtils.isNotBlank(serverConfig.getUsername()) && StringUtils.isNotBlank(serverConfig.getPassword())) {
             configAddArgs.add("--user=" + serverConfig.getUsername());
             configAddArgs.add("--password=" + serverConfig.getPassword());
         }
