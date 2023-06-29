@@ -1,5 +1,5 @@
 pipelines:
-  - name: create_artifactory_bamboo_plugin_snapshot
+  - name: create_jfrog_bamboo_plugin_snapshot
     configuration:
       runtime:
         type: image
@@ -27,7 +27,7 @@ pipelines:
             # Set env
             - export CI=true
             - export JFROG_BUILD_STATUS=PASS
-            - export JFROG_CLI_BUILD_NAME=ecosystem-artifactory-bamboo-plugin-dev
+            - export JFROG_CLI_BUILD_NAME=ecosystem-jfrog-bamboo-plugin-dev
             - export JFROG_CLI_BUILD_NUMBER=$run_number
             - export JFROG_CLI_BUILD_PROJECT=ecosys
 

@@ -5,7 +5,7 @@ resources:
       path: jfrog/bamboo-jfrog-plugin
       gitProvider: il_automation
       branches:
-        include: master
+        include: main
 
   - name: bambooReleaseGit
     type: GitRepo
@@ -15,4 +15,4 @@ resources:
       buildOn:
         commit: false
       branches:
-        include: master
+        include: main
