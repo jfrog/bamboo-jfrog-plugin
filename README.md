@@ -58,7 +58,3 @@ Enter the Tasks section and add the *JFrog CLI task*.
 
 Then enter your JFrog CLI task and select the Server ID.
 ![Selecting JFrog CLI task](images/readme/task.png)
-
-## Contributing
-
-We welcome contributions from the community. Follow the guidelines in the [contribution guide](link-to-contribution-guide) to contribute to the Bamboo JFrog Plugin.
