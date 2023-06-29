@@ -84,7 +84,7 @@ public class EncryptionHelper {
             return decryptWithKey(dbKey, encrypted);
         } catch (Exception e) {
             try {
-                final byte[] encrypted = new Base32().decode(data);
+                final byte[] encrypted = Base32.decode(data);
                 return decryptWithKey(uiKey, encrypted);
             } catch (Exception ee) {
                 throw new RuntimeException("Failed to decrypt.", ee);
