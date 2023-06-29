@@ -27,12 +27,12 @@
     <component name="JFrog Server Configuration Management Component" key="jfrogServerConfigManager"
                class="org.jfrog.bamboo.config.ServerConfigManager"/>
 
-    <web-item key="configureJfrogPlugin" name="JFrog Plugin" section="system.admin/plugins">
-        <label key="JFrog Plugin"/>
+    <web-item key="configureJfrogPlugin" name="JFrog Configuration" section="system.admin/plugins">
+        <label key="JFrog Configuration"/>
         <link linkId="configureJfrogPlugin">/templates/jfrogConfiguration.action</link>
     </web-item>
 
-    <xwork key="jfrogConfigAdmin" name="JFrog Plugin">
+    <xwork key="jfrogConfigAdmin" name="JFrog Configuration">
         <package name="configureJfrogPlugin" extends="admin">
 
             <!-- Main container -->
