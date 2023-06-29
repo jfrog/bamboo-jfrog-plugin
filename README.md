@@ -2,22 +2,23 @@
 
 <div align="center">
 
-# Bamboo JFrog CLI Plugin
+# Bamboo JFrog Plugin
 
 </div>
 
 
 ## Table of Contents
 
-- [Features](#features)
-- [Installation](#installation)
+- [Overview](#Overview)
+- [Key Features](#Key-Features)
+- [Installation](#Installation-and-Configuration)
 - [Usage](#usage)
 - [Contributing](#contributing)
 
 ## Overview
 
-The **Bamboo JFrog CLI Plugin** is designed to provide an easy integration between Bamboo and the [JFrog Platform](https://jfrog.com/solution-sheet/jfrog-platform/).
-Unlike the [Bamboo Artifactory Plugin](https://plugins.atlassian.com/plugin/details/27818), the new **Bamboo JFrog CLI Plugin** focuses on a single task that runs [JFrog CLI](https://jfrog.com/help/r/jfrog-cli/jfrog-cli) commands.
+The **Bamboo JFrog Plugin** is designed to provide an easy integration between Bamboo and the [JFrog Platform](https://jfrog.com/solution-sheet/jfrog-platform/).
+Unlike the [Bamboo Artifactory Plugin](https://plugins.atlassian.com/plugin/details/27818), the new **Bamboo JFrog Plugin** focuses on a single task that runs [JFrog CLI](https://jfrog.com/help/r/jfrog-cli/jfrog-cli) commands.
 The advantage of this approach is that JFrog CLI is a powerful and versatile tool that integrates with all JFrog capabilities.
 It offers extensive features and functionalities, and it is constantly improved and updated with the latest enhancements from JFrog.
 This ensures that the Bamboo JFrog Plugin is always up-to-date with the newest features and improvements provided by JFrog.
@@ -43,8 +44,10 @@ software package to remote locations using [JFrog Distribution](https://jfrog.co
 
    ![Bamboo Administration - Manage Apps - JFrog Configuration](images/readme/menu.png)
 4. Click on *New JFrog Platform Configuration*.
+
    ![New JFrog Platform Configuration](images/readme/newConfig.png)
 5. Configure your credentials details and run a *Test Connection* and then Save.
+
    ![Server Configuration](images/readme/serverConfig.png)
 
 ## Usage
