@@ -52,21 +52,25 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
     public void validate() {
         clearErrorsAndMessages();
         if (StringUtils.isBlank(serverId)) {
-            addFieldError("url", "Please specify a Server ID identifier.");
-        }
-        if (mode.equals("add") && serverConfigManager.getServerConfigById(serverId) != null) {
+            addFieldError("serverId", "Please specify a Server ID identifier.");
+        } else if (mode.equals("add") && serverConfigManager.getServerConfigById(serverId) != null) {
             addFieldError("serverId", "Server ID already exists.");
         }
+
         if (StringUtils.isBlank(url)) {
             addFieldError("url", "Please specify a URL of a JFrog Platform.");
-        } else if (StringUtils.isBlank(serverId)){
-            addFieldError("serverId", "Please specify a Server Id for your JFrog Platform.");
         } else {
             try {
                 new URL(url);
             } catch (MalformedURLException mue) {
                 addFieldError("url", "Please specify a valid URL of a JFrog Platform.");
             }
+        }
+
+        if (StringUtils.isNotBlank(username) && StringUtils.isBlank(password)){
+            addFieldError("password", "Please specify the password of your JFrog Platform.");
+        } else if (StringUtils.isBlank(username) && StringUtils.isNotBlank(password)){
+            addFieldError("username", "Please specify the username of your JFrog Platform.");
         }
     }
 

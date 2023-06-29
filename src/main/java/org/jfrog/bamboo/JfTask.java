@@ -40,20 +40,21 @@ public class JfTask extends JfContext implements TaskType {
         buildLog = new BuildLog(log, taskContext.getBuildLogger());
         serverConfigManager = ServerConfigManager.getInstance();
         ConfigurationMap confMap = taskContext.getConfigurationMap();
-        String serverId = confMap.get(JF_TASK_SERVER_ID);
 
         try {
             // Download CLI (if needed) and retrieve path
             String jfExecutablePath = JfInstaller.getJfExecutable("", buildLog);
 
             // Create commandRunner to run JFrog CLI commands
-            commandRunner = new ExecutableRunner(jfExecutablePath, taskContext.getWorkingDirectory(), createJfrogEnvironmentVariables(taskContext.getBuildContext(), serverId), buildLog);
+            String serverId = confMap.get(JF_TASK_SERVER_ID);
+            Map<String, String> envs = createJfrogEnvironmentVariables(taskContext.getBuildContext(), serverId);
+            commandRunner = new ExecutableRunner(jfExecutablePath, taskContext.getWorkingDirectory(), envs, buildLog);
 
             // Run 'jf config add' and 'jf config use' commands.
             configAllJFrogServers();
 
             // Make selected Server ID as default (by 'jf c use')
-            runJFrogCliConfigUseCommand(serverId);
+            commandRunner.run(List.of("config", "use", serverId));
 
             // Running JFrog CLI command
             String cliCommand = confMap.get(JF_TASK_COMMAND);
@@ -88,9 +89,6 @@ public class JfTask extends JfContext implements TaskType {
         environmentVariables.put("JFROG_CLI_USER_AGENT", BambooUtils.getJFrogPluginIdentifier(pluginAccessor));
         environmentVariables.put("JFROG_CLI_LOG_TIMESTAMP", "OFF");
 
-        // todo: remove this:
-        environmentVariables.put("JFROG_CLI_LOG_LEVEL", "DEBUG");
-
         buildLog.info("The following environment variables will be used: " + environmentVariables);
         return environmentVariables;
     }
@@ -118,13 +116,6 @@ public class JfTask extends JfContext implements TaskType {
             configAddArgs.add("--password=" + serverConfig.getPassword());
         }
         commandRunner.run(configAddArgs);
-    }
-
-    private void runJFrogCliConfigUseCommand(String serverId) throws IOException, InterruptedException {
-        buildLog.info("Using ServerID: " + serverId);
-        // Run 'jf config use' command to make the previously configured server as default.
-        List<String> configUseArgs = List.of("config", "use", serverId);
-        commandRunner.run(configUseArgs);
     }
 
     @SuppressWarnings("unused")

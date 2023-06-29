@@ -1,5 +1,5 @@
 <br>
-<div style="border: 2px solid #51a630; padding: 15px; width: max-content;">
+<div style="border: 2px solid #51a630; padding: 15px; width: fit-content;">
 
 [@ww.label
 value="🐸 JFrog CLI command to run:"
