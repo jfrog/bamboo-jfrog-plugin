@@ -19,8 +19,13 @@ package org.jfrog.bamboo.config;
 import com.atlassian.bamboo.bandana.PlanAwareBandanaContext;
 import com.atlassian.bandana.BandanaManager;
 import com.atlassian.spring.container.ContainerManager;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,6 +51,7 @@ public class ServerConfigManager implements Serializable {
     private static final String JFROG_CONFIG_KEY = "org.jfrog.bamboo.server.config";
     private final List<ServerConfig> configuredServers = new CopyOnWriteArrayList<>();
     private BandanaManager bandanaManager = null;
+    private final ObjectMapper mapper = createMapper();
 
     public List<ServerConfig> getAllServerConfigs() {
         return new ArrayList<>(configuredServers);
@@ -71,7 +77,7 @@ public class ServerConfigManager implements Serializable {
         configuredServers.add(serverConfig);
         try {
             persist();
-        } catch (IllegalAccessException | UnsupportedEncodingException e) {
+        } catch (IllegalAccessException | UnsupportedEncodingException | JsonProcessingException e) {
             log.error("Could not add JFrog configuration.", e);
         }
     }
@@ -82,7 +88,7 @@ public class ServerConfigManager implements Serializable {
                 configuredServers.remove(configuredServer);
                 try {
                     persist();
-                } catch (IllegalAccessException | UnsupportedEncodingException e) {
+                } catch (IllegalAccessException | UnsupportedEncodingException | JsonProcessingException e) {
                     log.error("Could not delete JFrog configuration.", e);
                 }
                 break;
@@ -100,7 +106,7 @@ public class ServerConfigManager implements Serializable {
                 configuredServer.setAccessToken(updated.getAccessToken());
                 try {
                     persist();
-                } catch (IllegalAccessException | UnsupportedEncodingException e) {
+                } catch (IllegalAccessException | UnsupportedEncodingException | JsonProcessingException e) {
                     log.error("Could not update JFrog configuration.", e);
                 }
                 break;
@@ -123,7 +129,7 @@ public class ServerConfigManager implements Serializable {
 
         String existingServersListAction = (String) bandanaManager.getValue(PlanAwareBandanaContext.GLOBAL_CONTEXT, JFROG_CONFIG_KEY);
         if (StringUtils.isNotBlank(existingServersListAction)) {
-            List<ServerConfig> serverConfigList = getServersFromXml(existingServersListAction);
+            List<ServerConfig> serverConfigList = mapper.readValue(existingServersListAction, new TypeReference<>(){});
             for (Object serverConfig : serverConfigList) {
                 // Because of some class loader issues we had to get a workaround,
                 // we serialize and deserialize the serverConfig object.
@@ -143,7 +149,7 @@ public class ServerConfigManager implements Serializable {
         }
     }
 
-    private synchronized void persist() throws IllegalAccessException, UnsupportedEncodingException {
+    private synchronized void persist() throws IllegalAccessException, UnsupportedEncodingException, JsonProcessingException {
         List<ServerConfig> serverConfigs = new ArrayList<>();
 
         for (ServerConfig serverConfig : configuredServers) {
@@ -157,101 +163,15 @@ public class ServerConfigManager implements Serializable {
                     )
             );
         }
-        String serverConfigsString = toXMLString(serverConfigs);
+        String serverConfigsString = mapper.writeValueAsString(serverConfigs);
         bandanaManager.setValue(PlanAwareBandanaContext.GLOBAL_CONTEXT, JFROG_CONFIG_KEY, serverConfigsString);
     }
 
-    private List<ServerConfig> getServersFromXml(String stringXml) throws IllegalAccessException, InstantiationException {
-        List<ServerConfig> serverConfigs = new ArrayList<>();
-        List<String> stringServerConfigs = findAllObjects(stringXml);
-        for (String stringServerConfig : stringServerConfigs) {
-            serverConfigs.add(getObjectFromStringXml(stringServerConfig, ServerConfig.class));
-        }
-        return serverConfigs;
-    }
-
-    private <T> T getObjectFromStringXml(String stringT, Class<T> tClass) throws IllegalAccessException, InstantiationException {
-        T object = tClass.newInstance();
-        boolean accsessable;
-        String value;
-        for (Field field : tClass.getDeclaredFields()) {
-            accsessable = field.isAccessible();
-            field.setAccessible(true);
-            value = findFirstObject(field.getName(), stringT, true);
-            if (field.getType().equals(long.class)) {
-                field.set(object, Long.parseLong(value));
-            } else if (field.getType().equals(int.class)) {
-                field.set(object, Integer.parseInt(value));
-            } else {
-                field.set(object, findFirstObject(field.getName(), stringT, true));
-            }
-            field.setAccessible(accsessable);
-        }
-        return object;
-    }
-
-    private List<String> findAllObjects(String scannedString) {
-        List<String> foundStrings = new ArrayList<>();
-        String foundString = findFirstObject(ServerConfig.class.getSimpleName(), scannedString, false);
-        while (!"".equals(foundString)) {
-            foundStrings.add(foundString);
-            scannedString = scannedString.replaceFirst(foundString, "");
-            foundString = findFirstObject(ServerConfig.class.getSimpleName(), scannedString, false);
-        }
-        return foundStrings;
-    }
-
-    private String findFirstObject(String objectToFind, String stringToScan, boolean dataOnly) {
-        String patternString = String.format("<%s>?(.*?)</%s>", objectToFind, objectToFind);
-        Pattern pattern = Pattern.compile(patternString);
-        Matcher matcher = pattern.matcher(stringToScan);
-        if (matcher.find()) {
-            if (dataOnly) {
-                return new String(Base64.getDecoder().decode(matcher.group(1).getBytes()));
-            }
-            return matcher.group(0);
-        }
-        return "";
-    }
-
-    private String toXMLString(List<ServerConfig> serverConfigs) throws IllegalAccessException, UnsupportedEncodingException {
-        StringBuilder stringBuilder = new StringBuilder();
-        openTag(stringBuilder, "List");
-        for (ServerConfig serverConfig : serverConfigs) {
-            stringBuilder.append(toXMLString(serverConfig));
-        }
-        closeTag(stringBuilder, "List");
-        return stringBuilder.toString();
-    }
-
-    private String toXMLString(Object object) throws IllegalAccessException, UnsupportedEncodingException {
-        StringBuilder stringBuilder = new StringBuilder();
-        openTag(stringBuilder, object.getClass().getSimpleName());
-        for (Field field : object.getClass().getDeclaredFields()) {
-            field.setAccessible(true);
-            String value = field.get(object) == null ? "" : field.get(object).toString();
-            appendAttribute(stringBuilder, field.getName(), value);
-        }
-        closeTag(stringBuilder, object.getClass().getSimpleName());
-        return stringBuilder.toString();
-    }
-
-    private void appendAttribute(StringBuilder stringBuilder, String field, String value) throws UnsupportedEncodingException {
-        openTag(stringBuilder, field);
-        // Encoding the value to Base64 to prevent saving special chars like % to the database
-        stringBuilder.append(Base64.getEncoder().encodeToString(value.getBytes(StandardCharsets.UTF_8)));
-        closeTag(stringBuilder, field);
-    }
-
-    private void openTag(StringBuilder stringBuilder, String fieldName) {
-        stringBuilder.append("<");
-        stringBuilder.append(fieldName);
-        stringBuilder.append(">");
-    }
-
-    private void closeTag(StringBuilder stringBuilder, String fieldName) {
-        stringBuilder.append("</");
-        stringBuilder.append(fieldName);
-        stringBuilder.append(">");
+    public static ObjectMapper createMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        return mapper;
     }
 }
