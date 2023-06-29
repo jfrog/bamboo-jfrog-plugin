@@ -30,7 +30,7 @@
     <packaging>atlassian-plugin</packaging>
 
     <properties>
-        <bamboo.version>9.3.0</bamboo.version>
+        <bamboo.version>9.3.1</bamboo.version>
         <bamboo.data.version>${bamboo.version}</bamboo.data.version>
         <amps.version>8.10.1</amps.version>
         <plugin.testrunner.version>2.0.3</plugin.testrunner.version>

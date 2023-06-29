@@ -52,7 +52,7 @@
     [#else]
         <tr>
             <td class="labelPrefixCell" colspan="4">
-                [@ww.text label="There are currently no JFrog Servers defined"/]
+                [@ww.text name="There are currently no JFrog Servers defined"/]
             </td>
         </tr>
     [/#if]
