@@ -10,6 +10,7 @@ import com.atlassian.bamboo.task.TaskResultBuilder;
 import com.atlassian.bamboo.task.TaskType;
 import com.atlassian.bamboo.v2.build.BuildContext;
 import com.atlassian.bamboo.variable.CustomVariableContext;
+import com.atlassian.crowd.exception.DirectoryNotFoundException;
 import com.atlassian.plugin.PluginAccessor;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -22,7 +23,10 @@ import org.jfrog.bamboo.utils.BambooUtils;
 import org.jfrog.bamboo.utils.BuildLog;
 import org.jfrog.bamboo.utils.ExecutableRunner;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class JfTask extends JfContext implements TaskType {
@@ -48,30 +52,53 @@ public class JfTask extends JfContext implements TaskType {
             // Create commandRunner to run JFrog CLI commands
             String serverId = confMap.get(JF_TASK_SERVER_ID);
             Map<String, String> envs = createJfrogEnvironmentVariables(taskContext.getBuildContext(), serverId);
-            commandRunner = new ExecutableRunner(jfExecutablePath, taskContext.getWorkingDirectory(), envs, buildLog);
+            File workingDir = getWorkingDirectory(confMap.get(JF_TASK_WORKING_DIRECTORY), taskContext.getWorkingDirectory());
+            commandRunner = new ExecutableRunner(jfExecutablePath, workingDir, envs, buildLog);
 
             // Run 'jf config add' and 'jf config use' commands.
-            configAllJFrogServers();
+            int exitCode = configAllJFrogServers();
+            if (exitCode != 0) {
+                resultBuilder.failedWithError().build();
+            }
 
             // Make selected Server ID as default (by 'jf c use')
-            commandRunner.run(List.of("config", "use", serverId));
-
+            exitCode = commandRunner.run(List.of("config", "use", serverId));
+            if (exitCode != 0) {
+                resultBuilder.failedWithError().build();
+            }
             // Running JFrog CLI command
             String cliCommand = confMap.get(JF_TASK_COMMAND);
             String[] splitArgs = cliCommand.trim().split(" ");
             List<String> cliCommandArgs = new ArrayList<>(Arrays.asList(splitArgs));
             // Received command format is 'jf <arg1> <<arg2> ...'
             // We remove 'jf' because the executable already exists on the command runner object.
-            if (cliCommandArgs.get(0).equalsIgnoreCase("jf")) {
+            if (cliCommandArgs.get(0).equals("jf")) {
                 cliCommandArgs.remove(0);
             }
-            commandRunner.run(cliCommandArgs);
-
+            exitCode = commandRunner.run(cliCommandArgs);
+            if (exitCode != 0) {
+                resultBuilder.failedWithError().build();
+            }
+        } catch (DirectoryNotFoundException e) {
+            buildLog.error(e.getMessage());
+            return resultBuilder.failedWithError().build();
         } catch (IOException | InterruptedException e) {
             buildLog.error(e + "\n" + ExceptionUtils.getStackTrace(e));
             return resultBuilder.failedWithError().build();
         }
         return resultBuilder.success().build();
+    }
+
+    private File getWorkingDirectory(String customWd, File defaultWd) throws DirectoryNotFoundException {
+        if (StringUtils.isBlank(customWd)) {
+            return defaultWd;
+        }
+
+        if (!Files.exists(Paths.get(customWd))) {
+            throw new DirectoryNotFoundException("Working directory: '" + customWd + "' does not exist.");
+        }
+
+        return new File(customWd);
     }
 
     private Map<String, String> createJfrogEnvironmentVariables(BuildContext buildContext, String serverId) throws IOException {
@@ -101,13 +128,18 @@ public class JfTask extends JfContext implements TaskType {
         return jfEnvs;
     }
 
-    private void configAllJFrogServers() throws IOException, InterruptedException {
+    private int configAllJFrogServers() throws IOException, InterruptedException {
+        int exitCode = 0;
         for (ServerConfig serverConfig : serverConfigManager.getAllServerConfigs()) {
-            runJFrogCliConfigAddCommand(serverConfig);
+            exitCode = runJFrogCliConfigAddCommand(serverConfig);
+            if (exitCode != 0) {
+                break;
+            }
         }
+        return exitCode;
     }
 
-    private void runJFrogCliConfigAddCommand(ServerConfig serverConfig) throws IOException, InterruptedException {
+    private int runJFrogCliConfigAddCommand(ServerConfig serverConfig) throws IOException, InterruptedException {
         // Run 'jf config add' command to configure the server.
         List<String> configAddArgs = new ArrayList<>(List.of(
                 "config",
@@ -123,7 +155,7 @@ public class JfTask extends JfContext implements TaskType {
             configAddArgs.add("--user=" + serverConfig.getUsername());
             configAddArgs.add("--password=" + serverConfig.getPassword());
         }
-        commandRunner.run(configAddArgs);
+        return commandRunner.run(configAddArgs);
     }
 
     @SuppressWarnings("unused")

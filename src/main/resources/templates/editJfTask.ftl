@@ -11,6 +11,7 @@
     rows='2'
     cssStyle="max-width: 400px;"
     placeholder="jf <command>"
+    required='true'
     /]
 
     [@ww.label
@@ -24,6 +25,16 @@
     listKey='serverId'
     toggle='true'
     required='true'
+    /]
+
+    [@ww.label
+    value="🐸 Working Directory (optional):"
+    description="Enter a working directory path. Leave blank for current local directory."
+    /]
+
+    [@ww.textarea
+    name='jf.task.working.directory'
+    cssStyle="max-width: 400px;"
     /]
 
 </div>

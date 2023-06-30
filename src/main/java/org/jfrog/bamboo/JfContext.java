@@ -16,6 +16,7 @@ public class JfContext extends AbstractTaskConfigurator {
     protected transient ServerConfigManager serverConfigManager;
     public final static String JF_TASK_SERVER_ID = "jf.task.server.id";
     public final static String JF_TASK_COMMAND = "jf.task.command";
+    public final static String JF_TASK_WORKING_DIRECTORY = "jf.task.working.directory";
 
     @Override
     public void populateContextForCreate(@NotNull Map<String, Object> context) {
@@ -32,6 +33,7 @@ public class JfContext extends AbstractTaskConfigurator {
         Map<String, String> config = taskDefinition.getConfiguration();
         context.put(JF_TASK_SERVER_ID, config.get(JF_TASK_SERVER_ID));
         context.put(JF_TASK_COMMAND, config.get(JF_TASK_COMMAND));
+        context.put(JF_TASK_WORKING_DIRECTORY, config.get(JF_TASK_WORKING_DIRECTORY));
         context.put("serverConfigManager", ServerConfigManager.getInstance());
     }
 
@@ -44,6 +46,7 @@ public class JfContext extends AbstractTaskConfigurator {
         final Map<String, String> config = super.generateTaskConfigMap(params, previousTaskDefinition);
         config.put(JF_TASK_SERVER_ID, params.getString(JF_TASK_SERVER_ID));
         config.put(JF_TASK_COMMAND, params.getString(JF_TASK_COMMAND));
+        config.put(JF_TASK_WORKING_DIRECTORY, params.getString(JF_TASK_WORKING_DIRECTORY));
         return config;
     }
 

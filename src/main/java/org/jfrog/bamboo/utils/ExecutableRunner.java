@@ -18,7 +18,7 @@ public class ExecutableRunner {
         this.buildLog = buildLog;
     }
 
-    public void run(List<String> commandArgs) throws IOException, InterruptedException {
+    public int run(List<String> commandArgs) throws IOException, InterruptedException {
         List<String> fullCommand = new ArrayList<>();
         fullCommand.add(executable);
         fullCommand.addAll(commandArgs);
@@ -49,8 +49,9 @@ public class ExecutableRunner {
             // Wait for the process to complete and return exit code
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-                throw new IOException("Command failed with exit code: " + exitCode);
+                buildLog.error("Command failed with exit code: " + exitCode);
             }
+            return exitCode;
         } catch (IOException | InterruptedException e) {
             buildLog.error("Failed running command: " + e);
             throw e;
