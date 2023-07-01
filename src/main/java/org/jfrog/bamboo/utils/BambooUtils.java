@@ -9,12 +9,22 @@ import com.atlassian.plugin.PluginAccessor;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * Utility class for common Bamboo operations.
+ */
 public class BambooUtils {
 
     public static final String JFROG_PLUGIN_NAME = "bamboo-jfrog-plugin";
 
+    /**
+     * Get the JFrog plugin identifier in the format "bamboo-jfrog-plugin/version".
+     *
+     * @param pluginAccessor The plugin accessor.
+     * @return The JFrog plugin identifier.
+     */
     public static String getJFrogPluginIdentifier(PluginAccessor pluginAccessor) {
         Plugin plugin = pluginAccessor.getPlugin("org.jfrog.bamboo." + JFROG_PLUGIN_NAME);
         if (plugin != null) {
@@ -24,26 +34,31 @@ public class BambooUtils {
     }
 
     /**
-     * Return the JFrog specific Build folder and create it if needed.
-     * Example - '~/bamboo-agent-home/temp/jfrog/MYP-CLIP-JOB1-16'
+     * Return the JFrog-specific build folder and create it if needed.
      *
-     * @param customVariableContext - Task custom variables
-     * @param fullBuildKey          - The full build key.
-     * @return JFrog specific Build folder
+     * @param customVariableContext The task custom variables.
+     * @param fullBuildKey          The full build key.
+     * @return The JFrog-specific build folder.
+     * @throws IOException If an I/O error occurs.
      */
     public static String getJfrogSpecificBuildTmp(CustomVariableContext customVariableContext, String fullBuildKey) throws IOException {
         String bambooTemp = customVariableContext.getVariableContexts().get("tmp.directory").getValue();
-        return Files.createDirectories(Paths.get(bambooTemp, "jfrog", fullBuildKey)).toString();
+        Path jfrogSpecificBuildTmp = Files.createDirectories(Paths.get(bambooTemp, "jfrog", fullBuildKey));
+        return jfrogSpecificBuildTmp.toString();
     }
 
     /**
-     * Determines the build URL of this Bamboo instance.<br> This method is needed since we query the plugin's servlets
-     * for build information that isn't accessible to a remote agent.<br> The URL can generally be found in {@link
-     * AdministrationConfiguration}
+     * Determines the build URL of this Bamboo instance.
+     * This method is needed since we query the plugin's servlets for build information that isn't accessible to a remote agent.
+     * The URL can generally be found in {@link AdministrationConfiguration}.
      *
-     * @return Bamboo build URL if found. Null if running in an un-recognized type of agent.
+     * @param fullBuildKey                        The full build key.
+     * @param administrationConfiguration         The administration configuration.
+     * @param administrationConfigurationAccessor The administration configuration accessor.
+     * @return The Bamboo build URL if found.
      */
-    public static String createBambooBuildUrl(String fullBuildKey, AdministrationConfiguration administrationConfiguration, AdministrationConfigurationAccessor administrationConfigurationAccessor) {
+    public static String createBambooBuildUrl(String fullBuildKey, AdministrationConfiguration administrationConfiguration,
+                                              AdministrationConfigurationAccessor administrationConfigurationAccessor) {
         String url = "";
         if (administrationConfiguration != null) {
             url = administrationConfiguration.getBaseUrl();
@@ -55,7 +70,6 @@ public class BambooUtils {
         if (!url.endsWith("/")) {
             summaryUrl.append("/");
         }
-        return summaryUrl.append("browse/").
-                append(EscapeChars.forFormSubmission(fullBuildKey)).toString();
+        return summaryUrl.append("browse/").append(EscapeChars.forFormSubmission(fullBuildKey)).toString();
     }
 }

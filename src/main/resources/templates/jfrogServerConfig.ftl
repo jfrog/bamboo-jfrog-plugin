@@ -22,7 +22,7 @@ cancelUri='/admin/jfrogConfiguration.action'
 showActionErrors='true'
 ]
     [@ww.param name='buttons']
-        [@ww.submit value="Test Connection" name="sendTest" /]
+        [@ww.submit value="Test Connection" name="testConnection" /]
     [/@ww.param]
 
     [@ui.bambooSection]
@@ -35,25 +35,26 @@ showActionErrors='true'
         autofocus=true
         /]
 
-        [@ww.textfield
-        label='JFrog Platform URL'
-        description='Please enter your JFrog Platform URL (example: https://acme.jfrog.io)'
-        name="url"
-        required="true"
-        /]
+            [@ww.textfield
+            label='JFrog Platform URL'
+            description='Please enter your JFrog Platform URL (example: https://acme.jfrog.io)'
+            name="url"
+            required="true"
+            /]
+    [#--The Dummy password is a workaround for the autofill (Chrome)--]
+            [@ww.password name='password.DUMMY' cssStyle='visibility:hidden; position: absolute;'/]
 
-        [@ww.radio fieldValue='token' label="Access Token" name='authentication' toggle='true' template='radio.ftl' /]
-        [@ww.radio fieldValue='basic' label="Basic Authentication" name='authentication' toggle='true' template='radio.ftl'/]
+            [@ww.radio fieldValue='token' label="Access Token" name='authentication' toggle='true' template='radio.ftl' /]
+            [@ui.bambooSection dependsOn='authentication' showOn='token']
+                    [@ww.password label='Access Token' name="accessToken" showPassword='true'/]
+            [/@ui.bambooSection]
 
-        [@ui.bambooSection dependsOn='authentication' showOn='token']
-            [@ww.password label='Access Token' name="accessToken" showPassword='true'/]
-        [/@ui.bambooSection]
-
-        [@ui.bambooSection dependsOn='authentication' showOn='basic']
-            [@ww.textfield label='User' name="username"/]
-            [@ww.password label='Password' name="password" showPassword='true'/]
-        [/@ui.bambooSection]
-        <br>
+            [@ww.radio fieldValue='basic' label="Basic Authentication" name='authentication' toggle='true' template='radio.ftl'/]
+            [@ui.bambooSection dependsOn='authentication' showOn='basic']
+                    [@ww.textfield label='Username' name="username"/]
+                    [@ww.password label='Password' name="password" showPassword='true'/]
+            [/@ui.bambooSection]
+            <br>
     [/@ui.bambooSection]
 [/@ww.form]
 </body>

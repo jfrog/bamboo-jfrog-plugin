@@ -1,6 +1,5 @@
 package org.jfrog.bamboo;
 
-
 import com.atlassian.bamboo.collections.ActionParametersMap;
 import com.atlassian.bamboo.task.AbstractTaskConfigurator;
 import com.atlassian.bamboo.task.TaskDefinition;
@@ -12,18 +11,19 @@ import org.jfrog.bamboo.config.ServerConfigManager;
 
 import java.util.Map;
 
+/**
+ * Configuration class for the JFrog Bamboo task.
+ */
 public class JfContext extends AbstractTaskConfigurator {
-    protected transient ServerConfigManager serverConfigManager;
-    public final static String JF_TASK_SERVER_ID = "jf.task.server.id";
-    public final static String JF_TASK_COMMAND = "jf.task.command";
-    public final static String JF_TASK_WORKING_DIRECTORY = "jf.task.working.directory";
+    public static final String JF_TASK_SERVER_ID = "jf.task.server.id";
+    public static final String JF_TASK_COMMAND = "jf.task.command";
+    public static final String JF_TASK_WORKING_DIRECTORY = "jf.task.working.directory";
 
     @Override
     public void populateContextForCreate(@NotNull Map<String, Object> context) {
         super.populateContextForCreate(context);
-        serverConfigManager = ServerConfigManager.getInstance();
         context.put(JF_TASK_COMMAND, "jf ");
-        context.put("serverConfigManager", serverConfigManager);
+        context.put("serverConfigManager", ServerConfigManager.getInstance());
         context.put("selectedServerId", 1);
     }
 

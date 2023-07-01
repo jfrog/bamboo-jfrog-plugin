@@ -1,6 +1,5 @@
 package org.jfrog.bamboo;
 
-
 import com.atlassian.bamboo.configuration.AdministrationConfiguration;
 import com.atlassian.bamboo.configuration.AdministrationConfigurationAccessor;
 import com.atlassian.bamboo.configuration.ConfigurationMap;
@@ -29,16 +28,25 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
+/**
+ * JFrog CLI Task.
+ */
 public class JfTask extends JfContext implements TaskType {
-    protected static final Logger log = LogManager.getLogger(JfTask.class);
-    protected transient ServerConfigManager serverConfigManager;
+    private static final Logger log = LogManager.getLogger(JfTask.class);
     private BuildLog buildLog;
+    private ServerConfigManager serverConfigManager;
     private ExecutableRunner commandRunner;
-    protected CustomVariableContext customVariableContext;
-    protected PluginAccessor pluginAccessor;
-    protected AdministrationConfiguration administrationConfiguration;
-    protected AdministrationConfigurationAccessor administrationConfigurationAccessor;
+    private CustomVariableContext customVariableContext;
+    private PluginAccessor pluginAccessor;
+    private AdministrationConfiguration administrationConfiguration;
+    private AdministrationConfigurationAccessor administrationConfigurationAccessor;
 
+    /**
+     * Executes the JFrog CLI Task.
+     *
+     * @param taskContext The task context.
+     * @return The task result.
+     */
     @Override
     public @NotNull TaskResult execute(final @NotNull TaskContext taskContext) {
         buildLog = new BuildLog(log, taskContext.getBuildLogger());
@@ -66,6 +74,7 @@ public class JfTask extends JfContext implements TaskType {
             if (exitCode != 0) {
                 resultBuilder.failedWithError().build();
             }
+
             // Running JFrog CLI command
             String cliCommand = confMap.get(JF_TASK_COMMAND);
             String[] splitArgs = cliCommand.trim().split(" ");
@@ -89,6 +98,14 @@ public class JfTask extends JfContext implements TaskType {
         return resultBuilder.success().build();
     }
 
+    /**
+     * Retrieves the working directory.
+     *
+     * @param customWd  The custom working directory.
+     * @param defaultWd The default working directory.
+     * @return The resolved working directory.
+     * @throws DirectoryNotFoundException If the working directory does not exist.
+     */
     private File getWorkingDirectory(String customWd, File defaultWd) throws DirectoryNotFoundException {
         if (StringUtils.isBlank(customWd)) {
             return defaultWd;
@@ -101,6 +118,14 @@ public class JfTask extends JfContext implements TaskType {
         return new File(customWd);
     }
 
+    /**
+     * Creates the JFrog CLI environment variables.
+     *
+     * @param buildContext The build context.
+     * @param serverId     The server ID.
+     * @return The JFrog CLI environment variables.
+     * @throws IOException If an I/O error occurs.
+     */
     private Map<String, String> createJfrogEnvironmentVariables(BuildContext buildContext, String serverId) throws IOException {
         Map<String, String> jfEnvs = new HashMap<>() {
             public String put(String key, String value) {
@@ -128,6 +153,13 @@ public class JfTask extends JfContext implements TaskType {
         return jfEnvs;
     }
 
+    /**
+     * Configures all JFrog servers using 'jf config add' command.
+     *
+     * @return The exit code of the command.
+     * @throws IOException          If an I/O error occurs.
+     * @throws InterruptedException If the execution is interrupted.
+     */
     private int configAllJFrogServers() throws IOException, InterruptedException {
         int exitCode = 0;
         for (ServerConfig serverConfig : serverConfigManager.getAllServerConfigs()) {
@@ -139,6 +171,14 @@ public class JfTask extends JfContext implements TaskType {
         return exitCode;
     }
 
+    /**
+     * Runs the 'jf config add' command to configure the server.
+     *
+     * @param serverConfig The server configuration.
+     * @return The exit code of the command.
+     * @throws IOException          If an I/O error occurs.
+     * @throws InterruptedException If the execution is interrupted.
+     */
     private int runJFrogCliConfigAddCommand(ServerConfig serverConfig) throws IOException, InterruptedException {
         // Run 'jf config add' command to configure the server.
         List<String> configAddArgs = new ArrayList<>(List.of(
@@ -158,21 +198,41 @@ public class JfTask extends JfContext implements TaskType {
         return commandRunner.run(configAddArgs);
     }
 
+    /**
+     * Sets the custom variable context.
+     *
+     * @param customVariableContext The custom variable context.
+     */
     @SuppressWarnings("unused")
     public void setCustomVariableContext(CustomVariableContext customVariableContext) {
         this.customVariableContext = customVariableContext;
     }
 
+    /**
+     * Sets the plugin accessor.
+     *
+     * @param pluginAccessor The plugin accessor.
+     */
     @SuppressWarnings("unused")
     public void setPluginAccessor(PluginAccessor pluginAccessor) {
         this.pluginAccessor = pluginAccessor;
     }
 
+    /**
+     * Sets the administration configuration.
+     *
+     * @param administrationConfiguration The administration configuration.
+     */
     @SuppressWarnings("unused")
     public void setAdministrationConfiguration(AdministrationConfiguration administrationConfiguration) {
         this.administrationConfiguration = administrationConfiguration;
     }
 
+    /**
+     * Sets the administration configuration accessor.
+     *
+     * @param administrationConfigurationAccessor The administration configuration accessor.
+     */
     @SuppressWarnings("unused")
     public void setAdministrationConfigurationAccessor(
             AdministrationConfigurationAccessor administrationConfigurationAccessor) {

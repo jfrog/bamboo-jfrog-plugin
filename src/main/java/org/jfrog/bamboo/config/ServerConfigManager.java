@@ -1,19 +1,3 @@
-/*
- * Copyright (C) 2010 JFrog Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.jfrog.bamboo.config;
 
 import com.atlassian.bamboo.bandana.PlanAwareBandanaContext;
@@ -38,36 +22,59 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * Manages the server configurations for JFrog.
+ */
 @Component
 public class ServerConfigManager implements Serializable {
 
     private final transient Logger log = LogManager.getLogger(ServerConfigManager.class);
 
-    private static final String JFROG_CONFIG_KEY = "org.jfrog.bamboo.server.config";
+    private static final String JFROG_CONFIG_KEY = "org.jfrog.bamboo.configurations.v1";
     private final List<ServerConfig> configuredServers = new CopyOnWriteArrayList<>();
     private BandanaManager bandanaManager = null;
     private final ObjectMapper mapper = Utils.createMapper();
 
-    public List<ServerConfig> getAllServerConfigs() {
-        return new ArrayList<>(configuredServers);
-    }
-
-    public ServerConfig getServerConfigById(String serverId) {
-        for (ServerConfig configuredServer : configuredServers) {
-            if (Objects.equals(configuredServer.getServerId(), serverId)) {
-                return configuredServer;
-            }
-        }
-
-        return null;
-    }
-
+    /**
+     * Get the instance of the ServerConfigManager.
+     *
+     * @return The ServerConfigManager instance.
+     */
     public static ServerConfigManager getInstance() {
         ServerConfigManager serverConfigManager = new ServerConfigManager();
         ContainerManager.autowireComponent(serverConfigManager);
         return serverConfigManager;
     }
 
+    /**
+     * Get all server configurations.
+     *
+     * @return List of server configurations.
+     */
+    public List<ServerConfig> getAllServerConfigs() {
+        return new ArrayList<>(configuredServers);
+    }
+
+    /**
+     * Get server configuration by ID.
+     *
+     * @param serverId The ID of the server configuration to retrieve.
+     * @return The server configuration matching the given ID, or null if not found.
+     */
+    public ServerConfig getServerConfigById(String serverId) {
+        for (ServerConfig configuredServer : configuredServers) {
+            if (Objects.equals(configuredServer.getServerId(), serverId)) {
+                return configuredServer;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Add a server configuration.
+     *
+     * @param serverConfig The server configuration to add.
+     */
     public void addServerConfiguration(ServerConfig serverConfig) {
         configuredServers.add(serverConfig);
         try {
@@ -77,6 +84,11 @@ public class ServerConfigManager implements Serializable {
         }
     }
 
+    /**
+     * Delete a server configuration by ID.
+     *
+     * @param serverId The ID of the server configuration to delete.
+     */
     public void deleteServerConfiguration(final String serverId) {
         for (ServerConfig configuredServer : configuredServers) {
             if (Objects.equals(configuredServer.getServerId(), serverId)) {
@@ -91,6 +103,11 @@ public class ServerConfigManager implements Serializable {
         }
     }
 
+    /**
+     * Update a server configuration.
+     *
+     * @param updated The updated server configuration.
+     */
     public void updateServerConfiguration(ServerConfig updated) {
         for (ServerConfig configuredServer : configuredServers) {
             if (Objects.equals(configuredServer.getServerId(), updated.getServerId())) {
@@ -113,20 +130,18 @@ public class ServerConfigManager implements Serializable {
     public void setBandanaManager(BandanaManager bandanaManager) {
         this.bandanaManager = bandanaManager;
         try {
-            setJfrogServers(bandanaManager);
+            setJfrogServers();
         } catch (InstantiationException | IllegalAccessException | IOException e) {
             log.error("Could not load JFrog configuration.", e);
         }
     }
 
-    private void setJfrogServers(BandanaManager bandanaManager)
-            throws IOException, InstantiationException, IllegalAccessException {
-
+    private void setJfrogServers() throws IOException, InstantiationException, IllegalAccessException {
         String existingServersListAction = (String) bandanaManager.getValue(PlanAwareBandanaContext.GLOBAL_CONTEXT, JFROG_CONFIG_KEY);
         if (StringUtils.isNotBlank(existingServersListAction)) {
             List<ServerConfig> serverConfigList = mapper.readValue(existingServersListAction, new TypeReference<>() {
             });
-            for (Object serverConfig : serverConfigList) {
+            for (ServerConfig serverConfig : serverConfigList) {
                 // Because of some class loader issues we had to get a workaround,
                 // we serialize and deserialize the serverConfig object.
                 ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();

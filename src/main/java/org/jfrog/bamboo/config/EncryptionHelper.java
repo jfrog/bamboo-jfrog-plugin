@@ -9,66 +9,37 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.concurrent.ThreadSafe;
 import javax.crypto.*;
-import javax.crypto.spec.DESedeKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 
 @ThreadSafe
 public class EncryptionHelper {
 
     private static final Logger log = LogManager.getLogger(EncryptionHelper.class);
-
-    private static final String DESEDE_ENCRYPTION_SCHEME = "DESede";
-
-    private static final String KEY_CHARSET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    private static final int KEY_LENGTH = 24;
+    private static final String AES_ENCRYPTION_SCHEME = "AES";
+    private static final int KEY_LENGTH = 128;
     private static final String uiKey = generateRandomKey();
-    private static final String dbKey = "Beetlejuice version $version (c) Copyright 2003-2005 Pols Consulting Limited";
-
-    /***
-     * Encrypts data with the constant DB key. Use this method to encrypt configuration data. For example, sensitive data which is meant
-     * to be saved to the DB.
-     * Use the 'decrypt' method for the opposite operation.
-     * @param stringToEncrypt - Nullable string to encrypt.
-     * @return - Encrypted data.
-     */
-    @NotNull
-    public static String encryptForConfig(@Nullable String stringToEncrypt) {
-        if (StringUtils.isEmpty(stringToEncrypt)) {
-            return "";
-        }
-
+    private static final String dbKey = "Im54vK3LcFh3r8DCVqWUMw==";
+    private static final ThreadLocal<Cipher> threadLocalEncrypter = ThreadLocal.withInitial(() -> {
         try {
-            final byte[] encrypted = getEncrypter(dbKey).doFinal(stringToEncrypt.getBytes(StandardCharsets.UTF_8));
-            return Base64.getMimeEncoder().encodeToString(encrypted);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to encrypt.", e);
+            return Cipher.getInstance(AES_ENCRYPTION_SCHEME);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+            log.error("Cannot create encrypter", e);
         }
-    }
-
-    /***
-     * Encrypts data with the changing generated key. Use this method to encrypt sensitive data before it is presented in the UI.
-     * Use the 'decrypt' method for the opposite operation.
-     * @param stringToEncrypt - Nullable string to encrypt.
-     * @return - Encrypted data.
-     */
-    @NotNull
-    public static String encryptForUi(@Nullable String stringToEncrypt) {
-        if (StringUtils.isEmpty(stringToEncrypt)) {
-            return "";
-        }
-
+        return null;
+    });
+    private static final ThreadLocal<Cipher> threadLocalDecrypter = ThreadLocal.withInitial(() -> {
         try {
-            final byte[] encrypted = getEncrypter(uiKey).doFinal(stringToEncrypt.getBytes(StandardCharsets.UTF_8));
-            return Base32.toBase32String(encrypted);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to encrypt.", e);
+            return Cipher.getInstance(AES_ENCRYPTION_SCHEME);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+            log.error("Cannot create decrypter", e);
         }
-    }
+        return null;
+    });
 
     @NotNull
     public static String decrypt(@Nullable String data) {
@@ -98,54 +69,75 @@ public class EncryptionHelper {
         return s;
     }
 
-    private static String decryptWithKey(String key, byte[] encrypted) throws InvalidKeySpecException, InvalidKeyException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException {
+    /**
+     * Encrypts data with the constant DB key. Use this method to encrypt configuration data. For example, sensitive data which is meant
+     * to be saved to the DB.
+     * Use the 'decrypt' method for the opposite operation.
+     *
+     * @param stringToEncrypt - Nullable string to encrypt.
+     * @return - Encrypted data.
+     */
+    @NotNull
+    public static String encryptForConfig(@Nullable String stringToEncrypt) {
+        if (StringUtils.isEmpty(stringToEncrypt)) {
+            return "";
+        }
+
+        try {
+            final byte[] encrypted = getEncrypter(dbKey).doFinal(stringToEncrypt.getBytes(StandardCharsets.UTF_8));
+            return Base64.getMimeEncoder().encodeToString(encrypted);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to encrypt.", e);
+        }
+    }
+
+    /**
+     * Encrypts data with the changing generated key. Use this method to encrypt sensitive data before it is presented in the UI.
+     * Use the 'decrypt' method for the opposite operation.
+     *
+     * @param stringToEncrypt - Nullable string to encrypt.
+     * @return - Encrypted data.
+     */
+    @NotNull
+    public static String encryptForUi(@Nullable String stringToEncrypt) {
+        if (StringUtils.isEmpty(stringToEncrypt)) {
+            return "";
+        }
+
+        try {
+            final byte[] encrypted = getEncrypter(uiKey).doFinal(stringToEncrypt.getBytes(StandardCharsets.UTF_8));
+            return Base32.toBase32String(encrypted);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to encrypt.", e);
+        }
+    }
+
+    private static String decryptWithKey(String key, byte[] encrypted) throws InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         return new String(getDecrypter(key).doFinal(encrypted), StandardCharsets.UTF_8);
     }
 
     private static String generateRandomKey() {
         SecureRandom rnd = new SecureRandom();
-        StringBuilder sb = new StringBuilder(KEY_LENGTH);
-        for (int i = 0; i < KEY_LENGTH; i++)
-            sb.append(KEY_CHARSET.charAt(rnd.nextInt(KEY_CHARSET.length())));
-        return sb.toString();
+        byte[] keyBytes = new byte[KEY_LENGTH / 8]; // Divide by 8 to convert bits to bytes
+        rnd.nextBytes(keyBytes);
+        return Base64.getEncoder().encodeToString(keyBytes);
     }
 
-    private static SecretKey generateSecret(String key)
-            throws InvalidKeySpecException, InvalidKeyException, NoSuchAlgorithmException {
-        DESedeKeySpec myKeySpec = new DESedeKeySpec(key.getBytes(StandardCharsets.UTF_8));
-        SecretKeyFactory myKeyFactory = SecretKeyFactory.getInstance(DESEDE_ENCRYPTION_SCHEME);
-        return myKeyFactory.generateSecret(myKeySpec);
+    private static SecretKey generateSecret(String key) {
+        return new SecretKeySpec(Base64.getDecoder().decode(key), AES_ENCRYPTION_SCHEME);
     }
 
-    private static Cipher getDecrypter(String key) throws InvalidKeySpecException, InvalidKeyException, NoSuchAlgorithmException {
+    private static Cipher getDecrypter(String key) throws InvalidKeyException {
         SecretKey secretKey = generateSecret(key);
         final Cipher decrypter = threadLocalDecrypter.get();
         decrypter.init(Cipher.DECRYPT_MODE, secretKey);
         return decrypter;
     }
 
-    private static Cipher getEncrypter(String key) throws InvalidKeySpecException, InvalidKeyException, NoSuchAlgorithmException {
+    private static Cipher getEncrypter(String key) throws InvalidKeyException {
         SecretKey secretKey = generateSecret(key);
         final Cipher encrypter = threadLocalEncrypter.get();
         encrypter.init(Cipher.ENCRYPT_MODE, secretKey);
         return encrypter;
     }
-
-    private static final ThreadLocal<Cipher> threadLocalEncrypter = ThreadLocal.withInitial(() -> {
-        try {
-            return Cipher.getInstance(DESEDE_ENCRYPTION_SCHEME);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            log.error("Cannot create encrypter", e);
-        }
-        return null;
-    });
-
-    private static final ThreadLocal<Cipher> threadLocalDecrypter = ThreadLocal.withInitial(() -> {
-        try {
-            return Cipher.getInstance(DESEDE_ENCRYPTION_SCHEME);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            log.error("Cannot create decrypter", e);
-        }
-        return null;
-    });
 }

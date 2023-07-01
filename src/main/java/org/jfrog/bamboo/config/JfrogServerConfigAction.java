@@ -1,23 +1,9 @@
-/*
- * Copyright (C) 2010 JFrog Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.jfrog.bamboo.config;
 
 import com.atlassian.bamboo.ww2.BambooActionSupport;
 import com.atlassian.bamboo.ww2.aware.permissions.GlobalAdminSecurityAware;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -30,9 +16,11 @@ import org.jfrog.build.extractor.clientConfiguration.client.artifactory.Artifact
 import java.net.MalformedURLException;
 import java.net.URL;
 
+@Getter
+@Setter
 public class JfrogServerConfigAction extends BambooActionSupport implements GlobalAdminSecurityAware {
 
-    private final transient Logger log = LogManager.getLogger(JfrogServerConfigAction.class);
+    private static final Logger log = LogManager.getLogger(JfrogServerConfigAction.class);
 
     private String mode;
     private String serverId;
@@ -40,9 +28,8 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
     private String username;
     private String password;
     private String accessToken;
-    private String isSendTest;
-
-    private final transient ServerConfigManager serverConfigManager;
+    private final ServerConfigManager serverConfigManager;
+    private String testConnection;
 
     public JfrogServerConfigAction(ServerConfigManager serverConfigManager) {
         this.serverConfigManager = serverConfigManager;
@@ -54,7 +41,7 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
         clearErrorsAndMessages();
         if (StringUtils.isBlank(serverId)) {
             addFieldError("serverId", "Please specify a Server ID identifier.");
-        } else if (mode.equals("add") && serverConfigManager.getServerConfigById(serverId) != null) {
+        } else if ("add".equals(mode) && serverConfigManager.getServerConfigById(serverId) != null) {
             addFieldError("serverId", "Server ID already exists.");
         }
 
@@ -84,13 +71,13 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
 
     @SuppressWarnings("unused")
     public String doCreate() {
-        if (isTesting()) {
+        if (isTestConnection()) {
             testConnection();
             return INPUT;
         }
 
         serverConfigManager.addServerConfiguration(
-                new ServerConfig(getServerId(), getUrl(), getUsername(), getPassword(), getAccessToken()));
+                new ServerConfig(serverId, url, username, password, accessToken));
         return SUCCESS;
     }
 
@@ -111,7 +98,7 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
         password = EncryptionHelper.decryptIfNeeded(password);
         accessToken = EncryptionHelper.decryptIfNeeded(accessToken);
 
-        if (isTesting()) {
+        if (isTestConnection()) {
             testConnection();
             // Encrypt password when returning it to UI.
             password = EncryptionHelper.encryptForUi(password);
@@ -124,7 +111,7 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
 
     @SuppressWarnings("unused")
     public String doDelete() {
-        serverConfigManager.deleteServerConfiguration(getServerId());
+        serverConfigManager.deleteServerConfiguration(serverId);
         return SUCCESS;
     }
 
@@ -143,68 +130,8 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
         return SUCCESS;
     }
 
-    @SuppressWarnings("unused")
-    public String getMode() {
-        return mode;
-    }
-
-    @SuppressWarnings("unused")
-    public void setMode(String mode) {
-        this.mode = mode;
-    }
-
-    private boolean isTesting() {
-        return StringUtils.isNotBlank(isSendTest);
-    }
-
-    public String getServerId() {
-        return serverId;
-    }
-
-    public void setServerId(String serverId) {
-        this.serverId = serverId;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
-
-    @SuppressWarnings("unused")
-    public String getIsSendTest() {
-        return isSendTest;
-    }
-
-    @SuppressWarnings("unused")
-    public void setSendTest(String sendTest) {
-        isSendTest = sendTest;
+    private boolean isTestConnection() {
+        return StringUtils.isNotBlank(testConnection);
     }
 
     private void testConnection() {

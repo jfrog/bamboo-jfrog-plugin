@@ -3,6 +3,7 @@ package org.jfrog.bamboo;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.bamboo.utils.BuildLog;
 import org.jfrog.bamboo.utils.OsUtils;
+import org.jfrog.build.client.DownloadResponse;
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 
 import java.io.File;
@@ -12,9 +13,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static java.lang.String.format;
-import static org.jfrog.build.client.DownloadResponse.SHA256_HEADER_NAME;
-
+/**
+ * The JFrog CLI installer.
+ */
 public class JfInstaller {
     private static final String RELEASE = "[RELEASE]";
     public static final String RELEASES_ARTIFACTORY_URL = "https://releases.jfrog.io/artifactory";
@@ -23,6 +24,11 @@ public class JfInstaller {
     private static final String SHA256_FILE_NAME = "sha256";
     public static final String BIN_JFROG_DIRECTORY = "jfrog";
 
+    /**
+     * Returns the JFrog CLI binary name based on the operating system.
+     *
+     * @return The JFrog CLI binary name.
+     */
     private static String getJfrogCliBinaryName() {
         if (OsUtils.isWindows()) {
             return BINARY_NAME + ".exe";
@@ -47,6 +53,14 @@ public class JfInstaller {
         return Files.createDirectories(jfExecDir).toAbsolutePath();
     }
 
+    /**
+     * Retrieves the JFrog CLI executable path.
+     *
+     * @param providedVersion The provided version of JFrog CLI. Use an empty string for the latest version.
+     * @param myBuildLog      The build log.
+     * @return The absolute path of the JFrog CLI executable.
+     * @throws IOException If an I/O error occurs while downloading or creating the executable.
+     */
     public static String getJfExecutable(final String providedVersion, BuildLog myBuildLog) throws IOException {
         myBuildLog.info("Getting JFrog CLI executable...");
 
@@ -60,20 +74,20 @@ public class JfInstaller {
         // Downloading executable from Artifactory
         try (ArtifactoryManager manager = new ArtifactoryManager(RELEASES_ARTIFACTORY_URL, "", "", myBuildLog)) {
             String cliUrlSuffix = String.format("/%s/v2-jf/%s/jfrog-cli-%s/%s", REPOSITORY, version, OsUtils.getOsDetails(), binaryName);
-            // Getting updated cli binary's sha256 form Artifactory.
-            String artifactorySha256 = manager.downloadHeader(cliUrlSuffix, SHA256_HEADER_NAME);
-            // Check whether it's needed to download a new executable, or it already exists on agent
+            // Getting updated CLI binary's sha256 from Artifactory.
+            String artifactorySha256 = manager.downloadHeader(cliUrlSuffix, DownloadResponse.SHA256_HEADER_NAME);
+            // Check whether it's needed to download a new executable or it already exists on the agent.
             if (shouldDownloadTool(executableLocation, artifactorySha256)) {
                 if (version.equals(RELEASE)) {
-                    myBuildLog.info(format("Download '%s' latest version from: %s%n", binaryName, RELEASES_ARTIFACTORY_URL + cliUrlSuffix));
+                    myBuildLog.info(String.format("Download '%s' latest version from: %s%n", binaryName, RELEASES_ARTIFACTORY_URL + cliUrlSuffix));
                 } else {
-                    myBuildLog.info(format("Download '%s' version %s from: %s%n", binaryName, version, RELEASES_ARTIFACTORY_URL + cliUrlSuffix));
+                    myBuildLog.info(String.format("Download '%s' version %s from: %s%n", binaryName, version, RELEASES_ARTIFACTORY_URL + cliUrlSuffix));
                 }
                 File downloadResponse = manager.downloadToFile(cliUrlSuffix, executableFullPath);
                 if (!downloadResponse.setExecutable(true)) {
                     throw new IOException("No permission to add execution permission to binary");
                 }
-                myBuildLog.info("Successfully downloaded JFrog cli executable: " + downloadResponse.getPath());
+                myBuildLog.info("Successfully downloaded JFrog CLI executable: " + downloadResponse.getPath());
                 createSha256File(executableLocation, artifactorySha256);
             } else {
                 myBuildLog.info("Found existing JFrog CLI executable");
@@ -85,15 +99,15 @@ public class JfInstaller {
     }
 
     /**
-     * We should skip the download if the tool's directory already contains the specific version, otherwise we should download it.
-     * A file named 'sha256' contains the specific binary sha256.
-     * If the file sha256 has not changed, we will skip the download, otherwise we will download and overwrite the existing files.
+     * Determines whether the tool needs to be downloaded based on the tool's directory and its sha256.
      *
-     * @param toolLocation      - expected location of the tool on the fileSystem.
-     * @param artifactorySha256 - sha256 of the expected file in artifactory.
+     * @param toolLocation      The expected location of the tool on the file system.
+     * @param artifactorySha256 The sha256 of the expected file in Artifactory.
+     * @return True if the tool should be downloaded, false otherwise.
+     * @throws IOException If an I/O error occurs while reading the sha256 file.
      */
     private static boolean shouldDownloadTool(Path toolLocation, String artifactorySha256) throws IOException {
-        // In case no sha256 was provided (for example when the customer blocks headers) download the tool.
+        // In case no sha256 was provided (for example when the customer blocks headers), download the tool.
         if (artifactorySha256.isEmpty()) {
             return true;
         }
@@ -106,9 +120,15 @@ public class JfInstaller {
         return !StringUtils.equals(fileContent, artifactorySha256);
     }
 
+    /**
+     * Creates a sha256 file containing the specified sha256 value.
+     *
+     * @param toolLocation      The tool location.
+     * @param artifactorySha256 The sha256 value.
+     * @throws IOException If an I/O error occurs while writing the file.
+     */
     private static void createSha256File(Path toolLocation, String artifactorySha256) throws IOException {
         File file = new File(toolLocation.toFile(), SHA256_FILE_NAME);
         Files.write(file.toPath(), artifactorySha256.getBytes(StandardCharsets.UTF_8));
     }
-
 }
