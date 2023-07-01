@@ -13,7 +13,7 @@
     placeholder="jf <command>"
     required='true'
     /]
-
+    <br>
     [@ww.label
     value="🐸 JFrog configuration to use:"
     description="Select one of the servers configured on the plugin configuration page."
@@ -26,13 +26,13 @@
     toggle='true'
     required='true'
     /]
-
+    <br>
     [@ww.label
     value="🐸 Working Directory (optional):"
-    description="Enter a working directory path. Leave blank for current local directory."
+    description="Enter a working directory path. Leave blank for current working directory."
     /]
 
-    [@ww.textarea
+    [@ww.textfield
     name='jf.task.working.directory'
     cssStyle="max-width: 400px;"
     /]
