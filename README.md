@@ -17,8 +17,12 @@
 
 The **Bamboo JFrog Plugin** is designed to provide an easy integration between Bamboo and
 the [JFrog Platform](https://jfrog.com/solution-sheet/jfrog-platform/).
-Unlike the [Bamboo Artifactory Plugin](https://plugins.atlassian.com/plugin/details/27818), the new **Bamboo JFrog
+
+Unlike the legacy [Bamboo Artifactory Plugin](https://plugins.atlassian.com/plugin/details/27818), the new **Bamboo
+JFrog
 Plugin** focuses on a single task that runs [JFrog CLI](https://jfrog.com/help/r/jfrog-cli/jfrog-cli) commands.
+Worth mentioning that both JFrog plugins, can work side by side.
+
 The advantage of this approach is that JFrog CLI is a powerful and versatile tool that integrates with all JFrog
 capabilities.
 It offers extensive features and functionalities, and it is constantly improved and updated with the latest enhancements
@@ -44,19 +48,24 @@ using [JFrog Distribution](https://jfrog.com/distribution/).
 1. Download the latest release of the plugin from the [Bamboo Marketplace](https://marketplace.atlassian.com/).
 2. Install the plugin on your Bamboo server.
 3. In the *Bamboo Administration* section, go to *Manage Apps* and select *JFrog Configuration*.
+
    ![Bamboo Administration - Manage Apps - JFrog Configuration](images/readme/menu.png)
 4. Click on *New JFrog Platform Configuration*.
+
    ![New JFrog Platform Configuration](images/readme/newConfig.png)
 5. Configure your credentials details and run a *Test Connection*, then click *Save*.
+
    ![Server Configuration](images/readme/serverConfig.png)
 
 ## Usage
 
-Once installed and configured, you can use the Bamboo JFrog Plugin's task in your Bamboo build plans. Follow these
+Once installed and configured, you can use the JFrog CLI task in your Bamboo build plans. Follow these
 steps:
 
 1. Go to the *Tasks* section of your build plan.
 2. Add the *JFrog CLI task* to your plan.
+
    ![Selecting JFrog CLI task](images/readme/selectTask.png)
 3. Configure the JFrog CLI task by selecting the appropriate Server ID.
+
    ![Configuring JFrog CLI task](images/readme/task.png)
