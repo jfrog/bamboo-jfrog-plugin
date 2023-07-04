@@ -8,11 +8,10 @@
 
 ## Table of Contents
 
-- [Overview](#Overview)
-- [Key Features](#Key-Features)
-- [Installation](#Installation-and-Configuration)
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Installation and Configuration](#installation-and-configuration)
 - [Usage](#usage)
-- [Contributing](#contributing)
 
 ## Overview
 
@@ -27,10 +26,10 @@ from JFrog.
 This ensures that the Bamboo JFrog Plugin is always up-to-date with the newest features and improvements provided by
 JFrog.
 
-This integration allows your build jobs to deploy artifacts and resolve dependencies to and
-from [Artifactory](https://jfrog.com/artifactory/), and then have them linked to the build job that created them.
-It also allows you to scan your artifacts and builds with [JFrog Xray](https://jfrog.com/xray/) and distribute your
-software package to remote locations using [JFrog Distribution](https://jfrog.com/distribution/).
+With the Bamboo JFrog Plugin, you can easily deploy artifacts, resolve dependencies, and link them to the build jobs
+that created them. Additionally, you can scan your artifacts and builds for vulnerabilities
+using [JFrog Xray](https://jfrog.com/xray/) and distribute your software packages to remote locations
+using [JFrog Distribution](https://jfrog.com/distribution/).
 
 ## Key Features
 
@@ -44,21 +43,20 @@ software package to remote locations using [JFrog Distribution](https://jfrog.co
 
 1. Download the latest release of the plugin from the [Bamboo Marketplace](https://marketplace.atlassian.com/).
 2. Install the plugin on your Bamboo server.
-3. Inside *Bamboo Administration* under *Manage Apps* select - *JFrog Configuration*.
-
+3. In the *Bamboo Administration* section, go to *Manage Apps* and select *JFrog Configuration*.
    ![Bamboo Administration - Manage Apps - JFrog Configuration](images/readme/menu.png)
 4. Click on *New JFrog Platform Configuration*.
-
    ![New JFrog Platform Configuration](images/readme/newConfig.png)
-5. Configure your credentials details and run a *Test Connection* and then Save.
-
+5. Configure your credentials details and run a *Test Connection*, then click *Save*.
    ![Server Configuration](images/readme/serverConfig.png)
 
 ## Usage
 
-Once installed and configured, use the plugin's task in your Bamboo build plans.
-Enter the Tasks section and add the *JFrog CLI task*.
-![Selecting JFrog CLI task](images/readme/selectTask.png)
+Once installed and configured, you can use the Bamboo JFrog Plugin's task in your Bamboo build plans. Follow these
+steps:
 
-Then enter your JFrog CLI task and select the Server ID.
-![Selecting JFrog CLI task](images/readme/task.png)
+1. Go to the *Tasks* section of your build plan.
+2. Add the *JFrog CLI task* to your plan.
+   ![Selecting JFrog CLI task](images/readme/selectTask.png)
+3. Configure the JFrog CLI task by selecting the appropriate Server ID.
+   ![Configuring JFrog CLI task](images/readme/task.png)
