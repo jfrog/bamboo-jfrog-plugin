@@ -66,13 +66,13 @@ public class JfTask extends JfContext implements TaskType {
             // Run 'jf config add' and 'jf config use' commands.
             int exitCode = configAllJFrogServers();
             if (exitCode != 0) {
-                resultBuilder.failedWithError().build();
+                return resultBuilder.failedWithError().build();
             }
 
             // Make selected Server ID as default (by 'jf c use')
             exitCode = commandRunner.run(List.of("config", "use", serverId));
             if (exitCode != 0) {
-                resultBuilder.failedWithError().build();
+                return resultBuilder.failedWithError().build();
             }
 
             // Running JFrog CLI command
@@ -86,7 +86,7 @@ public class JfTask extends JfContext implements TaskType {
             }
             exitCode = commandRunner.run(cliCommandArgs);
             if (exitCode != 0) {
-                resultBuilder.failedWithError().build();
+                return resultBuilder.failedWithError().build();
             }
         } catch (IOException | InterruptedException | DirectoryNotFoundException e) {
             buildLog.error(ExceptionUtils.getRootCauseMessage(e), e);
@@ -103,7 +103,7 @@ public class JfTask extends JfContext implements TaskType {
      * @return The resolved working directory.
      * @throws DirectoryNotFoundException If the working directory does not exist.
      */
-    private File getWorkingDirectory(String customWd, File defaultWd) throws DirectoryNotFoundException {
+    public File getWorkingDirectory(String customWd, File defaultWd) throws DirectoryNotFoundException {
         if (StringUtils.isBlank(customWd)) {
             return defaultWd;
         }
@@ -123,7 +123,7 @@ public class JfTask extends JfContext implements TaskType {
      * @return The JFrog CLI environment variables.
      * @throws IOException If an I/O error occurs.
      */
-    private Map<String, String> createJfrogEnvironmentVariables(BuildContext buildContext, String serverId) throws IOException {
+    public Map<String, String> createJfrogEnvironmentVariables(BuildContext buildContext, String serverId) throws IOException {
         Map<String, String> jfEnvs = new HashMap<>() {
             public String put(String key, String value) {
                 if (StringUtils.isBlank(System.getProperty(key))) {
@@ -176,7 +176,7 @@ public class JfTask extends JfContext implements TaskType {
      * @throws IOException          If an I/O error occurs.
      * @throws InterruptedException If the execution is interrupted.
      */
-    private int runJFrogCliConfigAddCommand(ServerConfig serverConfig) throws IOException, InterruptedException {
+    public int runJFrogCliConfigAddCommand(ServerConfig serverConfig) throws IOException, InterruptedException {
         // Run 'jf config add' command to configure the server.
         List<String> configAddArgs = new ArrayList<>(List.of(
                 "config",
