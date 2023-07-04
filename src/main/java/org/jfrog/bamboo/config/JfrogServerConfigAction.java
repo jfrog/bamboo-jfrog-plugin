@@ -142,7 +142,7 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
             }
             addActionMessage("Connection successful! JFrog Artifactory version: " + rtVersion);
         } catch (Exception e) {
-            addActionError("Connection failed: " + e.getMessage());
+            addActionError("Connection failed: " + ExceptionUtils.getRootCauseMessage(e));
             log.error("Error while testing the connection to Artifactory server " + url, e);
         }
     }

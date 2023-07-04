@@ -88,11 +88,8 @@ public class JfTask extends JfContext implements TaskType {
             if (exitCode != 0) {
                 resultBuilder.failedWithError().build();
             }
-        } catch (DirectoryNotFoundException e) {
-            buildLog.error(e.getMessage());
-            return resultBuilder.failedWithError().build();
-        } catch (IOException | InterruptedException e) {
-            buildLog.error(e + "\n" + ExceptionUtils.getStackTrace(e));
+        } catch (IOException | InterruptedException | DirectoryNotFoundException e) {
+            buildLog.error(ExceptionUtils.getRootCauseMessage(e), e);
             return resultBuilder.failedWithError().build();
         }
         return resultBuilder.success().build();
