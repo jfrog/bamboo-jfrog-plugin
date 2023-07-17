@@ -49,6 +49,7 @@ public class ExecutableRunner {
                 .redirectErrorStream(true);
         processBuilder.environment().putAll(envs);
 
+        buildLog.info("Working Directory: " + workingDir);
         buildLog.info("Running command: " + maskSecrets(String.join(" ", processBuilder.command())));
 
         Process process = processBuilder.start();

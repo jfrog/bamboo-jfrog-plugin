@@ -22,18 +22,32 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
 
     private static final Logger log = LogManager.getLogger(JfrogServerConfigAction.class);
 
+    private static final String MODE_ADD = "add";
+    private static final String AUTH_TYPE_TOKEN = "token";
+    private static final String AUTH_TYPE_BASIC = "basic";
+    private static final String AUTH_TYPE_NO_AUTH = "noAuth";
+
     private String mode;
+    private String authType;
+    private boolean specificVersion;
+    private boolean fromArtifactory;
+
     private String serverId;
     private String url;
     private String username;
     private String password;
     private String accessToken;
+    private String cliVersion;
+    private String cliRepository;
     private final ServerConfigManager serverConfigManager;
     private String testConnection;
 
     public JfrogServerConfigAction(ServerConfigManager serverConfigManager) {
         this.serverConfigManager = serverConfigManager;
-        mode = "add";
+        mode = MODE_ADD;
+        authType = AUTH_TYPE_TOKEN;
+        specificVersion = false;
+        fromArtifactory = false;
     }
 
     @Override
@@ -41,7 +55,7 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
         clearErrorsAndMessages();
         if (StringUtils.isBlank(serverId)) {
             addFieldError("serverId", "Please specify a Server ID identifier.");
-        } else if ("add".equals(mode) && serverConfigManager.getServerConfigById(serverId) != null) {
+        } else if (MODE_ADD.equals(mode) && serverConfigManager.getServerConfigById(serverId) != null) {
             addFieldError("serverId", "Server ID already exists.");
         }
 
@@ -76,21 +90,40 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
             return INPUT;
         }
 
-        serverConfigManager.addServerConfiguration(
-                new ServerConfig(serverId, url, username, password, accessToken));
+        serverConfigManager.addServerConfiguration(createServerConfig());
         return SUCCESS;
     }
 
+    // Get current server config details from bandana to show on UI form
     @SuppressWarnings("unused")
     public String doEdit() throws IllegalArgumentException {
         ServerConfig serverConfig = serverConfigManager.getServerConfigById(serverId);
         if (serverConfig == null) {
             throw new IllegalArgumentException("Could not find Artifactory server configuration by the ID " + serverId);
         }
-        updateFieldsFromServerConfig(serverConfig);
+        serverId = serverConfig.getServerId();
+        url = serverConfig.getUrl();
+        username = serverConfig.getUsername();
+        cliVersion = serverConfig.getCliVersion();
+        cliRepository = serverConfig.getCliRepository();
+        password = EncryptionHelper.encryptForUi(serverConfig.getPassword());
+        accessToken = EncryptionHelper.encryptForUi(serverConfig.getAccessToken());
+
+        if (StringUtils.isNotBlank(accessToken)) {
+            authType = AUTH_TYPE_TOKEN;
+        } else if (StringUtils.isNotBlank(password)) {
+            authType = AUTH_TYPE_BASIC;
+        }
+
+        if (StringUtils.isNotBlank(cliVersion)) {
+            specificVersion = true;
+        }
+
+        if (StringUtils.isNotBlank(cliRepository)) {
+            fromArtifactory = true;
+        }
         return INPUT;
     }
-
 
     @SuppressWarnings("unused")
     public String doUpdate() {
@@ -107,6 +140,33 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
         }
         serverConfigManager.updateServerConfiguration(createServerConfig());
         return SUCCESS;
+    }
+
+    private void testConnection() {
+        ServerConfig serverConfig = createServerConfig();
+        try (ArtifactoryManager manager = new ArtifactoryManager(serverConfig.getUrl() + "/artifactory", serverConfig.getUsername(), serverConfig.getPassword(), serverConfig.getAccessToken(), new BuildLog(log))) {
+            ArtifactoryVersion rtVersion = manager.getVersion();
+            if (rtVersion == null || rtVersion.equals(ArtifactoryVersion.NOT_FOUND)) {
+                addActionError("Couldn't reach JFrog Artifactory server");
+            }
+            addActionMessage("Connection successful! JFrog Artifactory version: " + rtVersion);
+        } catch (Exception e) {
+            addActionError("Connection failed: " + ExceptionUtils.getRootCauseMessage(e));
+            log.error("Error while testing the connection to Artifactory server " + url, e);
+        }
+    }
+
+    @NotNull
+    private ServerConfig createServerConfig() {
+        return new ServerConfig(
+                serverId,
+                StringUtils.removeEnd(url, "/"),
+                authType.equals(AUTH_TYPE_BASIC) ? username : "",
+                authType.equals(AUTH_TYPE_BASIC) ? password : "",
+                authType.equals(AUTH_TYPE_TOKEN) ? accessToken : "",
+                specificVersion ? cliVersion : "",
+                fromArtifactory ? cliRepository : ""
+        );
     }
 
     @SuppressWarnings("unused")
@@ -134,35 +194,4 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
         return StringUtils.isNotBlank(testConnection);
     }
 
-    private void testConnection() {
-        try (ArtifactoryManager manager = new ArtifactoryManager(url + "/artifactory", username, password, accessToken, new BuildLog(log))) {
-            ArtifactoryVersion rtVersion = manager.getVersion();
-            if (rtVersion == null || rtVersion.equals(ArtifactoryVersion.NOT_FOUND)) {
-                addActionError("Couldn't reach JFrog Artifactory server");
-            }
-            addActionMessage("Connection successful! JFrog Artifactory version: " + rtVersion);
-        } catch (Exception e) {
-            addActionError("Connection failed: " + ExceptionUtils.getRootCauseMessage(e));
-            log.error("Error while testing the connection to Artifactory server " + url, e);
-        }
-    }
-
-    /**
-     * Update fields to show in the server update page in the UI.
-     * Encrypting password, so it won't show in the UI inspection.
-     *
-     * @param serverConfig - Server being updated.
-     */
-    private void updateFieldsFromServerConfig(ServerConfig serverConfig) {
-        setServerId(serverConfig.getServerId());
-        setUrl(serverConfig.getUrl());
-        setUsername(serverConfig.getUsername());
-        setPassword(EncryptionHelper.encryptForUi(serverConfig.getPassword()));
-        setAccessToken(EncryptionHelper.encryptForUi(serverConfig.getAccessToken()));
-    }
-
-    @NotNull
-    private ServerConfig createServerConfig() {
-        return new ServerConfig(serverId, url, username, password, accessToken);
-    }
 }

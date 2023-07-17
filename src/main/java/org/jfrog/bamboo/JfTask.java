@@ -9,7 +9,6 @@ import com.atlassian.bamboo.task.TaskResultBuilder;
 import com.atlassian.bamboo.task.TaskType;
 import com.atlassian.bamboo.v2.build.BuildContext;
 import com.atlassian.bamboo.variable.CustomVariableContext;
-import com.atlassian.crowd.exception.DirectoryNotFoundException;
 import com.atlassian.plugin.PluginAccessor;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -21,12 +20,17 @@ import org.jfrog.bamboo.config.ServerConfigManager;
 import org.jfrog.bamboo.utils.BambooUtils;
 import org.jfrog.bamboo.utils.BuildLog;
 import org.jfrog.bamboo.utils.ExecutableRunner;
+import org.jfrog.bamboo.utils.Utils;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * JFrog CLI Task.
@@ -53,14 +57,23 @@ public class JfTask extends JfContext implements TaskType {
         serverConfigManager = ServerConfigManager.getInstance();
         ConfigurationMap confMap = taskContext.getConfigurationMap();
         TaskResultBuilder resultBuilder = TaskResultBuilder.newBuilder(taskContext);
+        String serverId = confMap.get(JF_TASK_SERVER_ID);
+        buildLog.info(JF_TASK_SERVER_ID + ": " + serverId);
+        ServerConfig selectedServerConfig = serverConfigManager.getServerConfigById(serverId);
+        if (selectedServerConfig == null) {
+            buildLog.error("the selected Server ID doesn't exists: " + serverId);
+            return resultBuilder.failedWithError().build();
+        }
         try {
+            String jfrogTmpDir = BambooUtils.getJfrogTmpDir(customVariableContext);
+
             // Download CLI (if needed) and retrieve path
-            String jfExecutablePath = JfInstaller.getJfExecutable("", buildLog);
+            String jfExecutablePath = JfInstaller.getJfExecutable(selectedServerConfig, jfrogTmpDir, buildLog);
 
             // Create commandRunner to run JFrog CLI commands
-            String serverId = confMap.get(JF_TASK_SERVER_ID);
             Map<String, String> envs = createJfrogEnvironmentVariables(taskContext.getBuildContext(), serverId);
             File workingDir = getWorkingDirectory(confMap.get(JF_TASK_WORKING_DIRECTORY), taskContext.getWorkingDirectory());
+            buildLog.info("Working directory: " + workingDir);
             commandRunner = new ExecutableRunner(jfExecutablePath, workingDir, envs, buildLog);
 
             // Run 'jf config add' and 'jf config use' commands.
@@ -77,18 +90,19 @@ public class JfTask extends JfContext implements TaskType {
 
             // Running JFrog CLI command
             String cliCommand = confMap.get(JF_TASK_COMMAND);
-            String[] splitArgs = cliCommand.trim().split(" ");
-            List<String> cliCommandArgs = new ArrayList<>(Arrays.asList(splitArgs));
-            // Received command format is 'jf <arg1> <<arg2> ...'
             // We remove 'jf' because the executable already exists on the command runner object.
-            if (cliCommandArgs.get(0).equals("jf")) {
-                cliCommandArgs.remove(0);
-            }
-            exitCode = commandRunner.run(cliCommandArgs);
+            cliCommand = StringUtils.removeStart(cliCommand, "jf ");
+
+            List<String> unwrappedArgs = Utils.splitStringPreservingQuotes(cliCommand)
+                    .stream()
+                    .map(Utils::unQuote)
+                    .collect(Collectors.toList());
+
+            exitCode = commandRunner.run(unwrappedArgs);
             if (exitCode != 0) {
                 return resultBuilder.failedWithError().build();
             }
-        } catch (IOException | InterruptedException | DirectoryNotFoundException e) {
+        } catch (IOException | InterruptedException e) {
             buildLog.error(ExceptionUtils.getRootCauseMessage(e), e);
             return resultBuilder.failedWithError().build();
         }
@@ -101,15 +115,15 @@ public class JfTask extends JfContext implements TaskType {
      * @param customWd  The custom working directory.
      * @param defaultWd The default working directory.
      * @return The resolved working directory.
-     * @throws DirectoryNotFoundException If the working directory does not exist.
+     * @throws IOException If the working directory does not exist.
      */
-    public File getWorkingDirectory(String customWd, File defaultWd) throws DirectoryNotFoundException {
+    public File getWorkingDirectory(String customWd, File defaultWd) throws IOException {
         if (StringUtils.isBlank(customWd)) {
             return defaultWd;
         }
 
         if (!Files.exists(Paths.get(customWd))) {
-            throw new DirectoryNotFoundException("Working directory: '" + customWd + "' does not exist.");
+            throw new IOException("Working directory: '" + customWd + "' does not exist.");
         }
 
         return new File(customWd);
@@ -137,8 +151,12 @@ public class JfTask extends JfContext implements TaskType {
         jfEnvs.put("JFROG_CLI_BUILD_NAME", buildContext.getPlanName());
         jfEnvs.put("JFROG_CLI_BUILD_NUMBER", String.valueOf(buildContext.getBuildNumber()));
 
+        // Build temporary directory to store JFrog config, will be deleted after the build.
         String fullBuildKey = buildContext.getResultKey().getKey();
-        jfEnvs.put("JFROG_CLI_HOME_DIR", BambooUtils.getJfrogSpecificBuildTmp(customVariableContext, fullBuildKey));
+        jfEnvs.put("JFROG_CLI_HOME_DIR", BambooUtils.getJfrogTmpSubdir(customVariableContext, fullBuildKey));
+
+        // Agent persistent directory to store the JFrog CLI executable and build-info extractors.
+        jfEnvs.put("JFROG_CLI_DEPENDENCIES_DIR", BambooUtils.getJfrogTmpSubdir(customVariableContext, "dependencies"));
 
         String buildUrl = BambooUtils.createBambooBuildUrl(fullBuildKey, administrationConfiguration, administrationConfigurationAccessor);
         jfEnvs.put("JFROG_CLI_BUILD_URL", buildUrl);
@@ -146,7 +164,7 @@ public class JfTask extends JfContext implements TaskType {
         jfEnvs.put("JFROG_CLI_USER_AGENT", BambooUtils.getJFrogPluginIdentifier(pluginAccessor));
         jfEnvs.put("JFROG_CLI_LOG_TIMESTAMP", "OFF");
 
-        buildLog.info("The following environment variables will be used: " + jfEnvs);
+        buildLog.info("The following JFrog CLI environment variables will be used: " + jfEnvs);
         return jfEnvs;
     }
 

@@ -57,6 +57,19 @@ using [JFrog Distribution](https://jfrog.com/distribution/).
 
    ![Server Configuration](images/readme/serverConfig.png)
 
+## JFrog CLI Settings
+
+1. By default, latest JFrog CLI will be used when running JFrog CLI tasks.
+   By setting JFrog CLI version user can make JFrog CLI tasks use a specific JFrog CLI version.
+
+2. By default, JFrog CLI will be downloaded from JFrog's download server - https://releases.jfrog.io
+   For users running on air-gaped environments it is possible to download JFrog CLI from the configured JFrog
+   Artifactory.
+   The Source Artifactory Repository should be the name of a Remote/Virtual repository in your Artifactory instance that
+   proxies https://releases.jfrog.io.
+
+   ![jfrogCliSettings.png](images/readme/jfrogCliSettings.png)
+
 ## Usage
 
 Once installed and configured, you can use the JFrog CLI task in your Bamboo build plans. Follow these

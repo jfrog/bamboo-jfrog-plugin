@@ -33,7 +33,7 @@ public class PostBuildAction implements CustomPostBuildCompletedAction {
     public @NotNull BuildContext call() throws IOException {
         // Delete Bamboo temp directory
         String fullBuildKey = buildContext.getResultKey().getKey();
-        FileUtils.deleteDirectory(BambooUtils.getJfrogSpecificBuildTmp(customVariableContext, fullBuildKey));
+        FileUtils.deleteDirectory(BambooUtils.getJfrogTmpSubdir(customVariableContext, fullBuildKey));
         return buildContext;
     }
 

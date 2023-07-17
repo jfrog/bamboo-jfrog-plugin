@@ -37,13 +37,26 @@ public class BambooUtils {
      * Return the JFrog-specific build folder and create it if needed.
      *
      * @param customVariableContext The task custom variables.
-     * @param fullBuildKey          The full build key.
      * @return The JFrog-specific build folder.
      * @throws IOException If an I/O error occurs.
      */
-    public static String getJfrogSpecificBuildTmp(CustomVariableContext customVariableContext, String fullBuildKey) throws IOException {
+    public static String getJfrogTmpDir(CustomVariableContext customVariableContext) throws IOException {
         String bambooTemp = customVariableContext.getVariableContexts().get("tmp.directory").getValue();
-        Path jfrogSpecificBuildTmp = Files.createDirectories(Paths.get(bambooTemp, "jfrog", fullBuildKey));
+        Path jfrogSpecificBuildTmp = Files.createDirectories(Paths.get(bambooTemp, "jfrog"));
+        return jfrogSpecificBuildTmp.toString();
+    }
+
+    /**
+     * Return the JFrog-specific build folder and create it if needed.
+     *
+     * @param customVariableContext The task custom variables.
+     * @param subdir                The subdirectory name.
+     * @return The JFrog-specific build folder.
+     * @throws IOException If an I/O error occurs.
+     */
+    public static String getJfrogTmpSubdir(CustomVariableContext customVariableContext, String subdir) throws IOException {
+        String jfrogTemp = getJfrogTmpDir(customVariableContext);
+        Path jfrogSpecificBuildTmp = Files.createDirectories(Paths.get(jfrogTemp, subdir));
         return jfrogSpecificBuildTmp.toString();
     }
 

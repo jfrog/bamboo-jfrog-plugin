@@ -111,11 +111,7 @@ public class ServerConfigManager implements Serializable {
     public void updateServerConfiguration(ServerConfig updated) {
         for (ServerConfig configuredServer : configuredServers) {
             if (Objects.equals(configuredServer.getServerId(), updated.getServerId())) {
-                configuredServer.setServerId(updated.getServerId());
-                configuredServer.setUrl(updated.getUrl());
-                configuredServer.setUsername(updated.getUsername());
-                configuredServer.setPassword(updated.getPassword());
-                configuredServer.setAccessToken(updated.getAccessToken());
+                configuredServer.copy(updated);
                 try {
                     persist();
                 } catch (IllegalAccessException | UnsupportedEncodingException | JsonProcessingException e) {
@@ -130,49 +126,36 @@ public class ServerConfigManager implements Serializable {
     public void setBandanaManager(BandanaManager bandanaManager) {
         this.bandanaManager = bandanaManager;
         try {
-            setJfrogServers();
-        } catch (InstantiationException | IllegalAccessException | IOException e) {
-            log.error("Could not load JFrog configuration.", e);
-        }
-    }
-
-    private void setJfrogServers() throws IOException, InstantiationException, IllegalAccessException {
-        String existingServersListAction = (String) bandanaManager.getValue(PlanAwareBandanaContext.GLOBAL_CONTEXT, JFROG_CONFIG_KEY);
-        if (StringUtils.isNotBlank(existingServersListAction)) {
-            List<ServerConfig> serverConfigList = mapper.readValue(existingServersListAction, new TypeReference<>() {
-            });
-            for (ServerConfig serverConfig : serverConfigList) {
-                // Because of some class loader issues we had to get a workaround,
-                // we serialize and deserialize the serverConfig object.
-                ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-                String json = ow.writeValueAsString(serverConfig);
-                ServerConfig tempServerConfig = new ObjectMapper().readValue(json, ServerConfig.class);
-                configuredServers.add(
-                        new ServerConfig(
-                                tempServerConfig.getServerId(),
-                                tempServerConfig.getUrl(),
-                                tempServerConfig.getUsername(),
-                                EncryptionHelper.decrypt(tempServerConfig.getPassword()),
-                                EncryptionHelper.decrypt(tempServerConfig.getAccessToken())
-                        )
-                );
+            String existingServersListAction = (String) bandanaManager.getValue(PlanAwareBandanaContext.GLOBAL_CONTEXT, JFROG_CONFIG_KEY);
+            if (StringUtils.isNotBlank(existingServersListAction)) {
+                List<ServerConfig> serverConfigList = mapper.readValue(existingServersListAction, new TypeReference<>() {
+                });
+                for (ServerConfig serverConfig : serverConfigList) {
+                    // Because of some class loader issues we had to get a workaround,
+                    // we serialize and deserialize the serverConfig object.
+                    ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+                    String json = ow.writeValueAsString(serverConfig);
+                    ServerConfig tempServerConfig = new ObjectMapper().readValue(json, ServerConfig.class);
+                    ServerConfig decryptedConfig = new ServerConfig();
+                    decryptedConfig.copy(serverConfig);
+                    decryptedConfig.setPassword(EncryptionHelper.decrypt(tempServerConfig.getPassword()));
+                    decryptedConfig.setAccessToken(EncryptionHelper.decrypt(tempServerConfig.getAccessToken()));
+                    configuredServers.add(decryptedConfig);
+                }
             }
+        } catch (IOException e) {
+            log.error("Could not load JFrog configuration.", e);
         }
     }
 
     private synchronized void persist() throws IllegalAccessException, UnsupportedEncodingException, JsonProcessingException {
         List<ServerConfig> serverConfigs = new ArrayList<>();
-
         for (ServerConfig serverConfig : configuredServers) {
-            serverConfigs.add(
-                    new ServerConfig(
-                            serverConfig.getServerId(),
-                            serverConfig.getUrl(),
-                            serverConfig.getUsername(),
-                            EncryptionHelper.encryptForConfig(serverConfig.getPassword()),
-                            EncryptionHelper.encryptForConfig(serverConfig.getAccessToken())
-                    )
-            );
+            ServerConfig encryptedConfig = new ServerConfig();
+            encryptedConfig.copy(serverConfig);
+            encryptedConfig.setPassword(EncryptionHelper.encryptForConfig(serverConfig.getPassword()));
+            encryptedConfig.setAccessToken(EncryptionHelper.encryptForConfig(serverConfig.getAccessToken()));
+            serverConfigs.add(encryptedConfig);
         }
         String serverConfigsString = mapper.writeValueAsString(serverConfigs);
         bandanaManager.setValue(PlanAwareBandanaContext.GLOBAL_CONTEXT, JFROG_CONFIG_KEY, serverConfigsString);

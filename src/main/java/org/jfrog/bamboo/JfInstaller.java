@@ -1,6 +1,7 @@
 package org.jfrog.bamboo;
 
 import org.apache.commons.lang.StringUtils;
+import org.jfrog.bamboo.config.ServerConfig;
 import org.jfrog.bamboo.utils.BuildLog;
 import org.jfrog.bamboo.utils.OsUtils;
 import org.jfrog.build.client.DownloadResponse;
@@ -18,11 +19,10 @@ import java.nio.file.Paths;
  */
 public class JfInstaller {
     private static final String RELEASE = "[RELEASE]";
-    public static final String RELEASES_ARTIFACTORY_URL = "https://releases.jfrog.io/artifactory";
-    public static final String REPOSITORY = "jfrog-cli";
+    public static final String RELEASES_URL = "https://releases.jfrog.io";
     public static final String BINARY_NAME = "jf";
     private static final String SHA256_FILE_NAME = "sha256";
-    public static final String BIN_JFROG_DIRECTORY = "jfrog";
+    public static final String JFROG_CLI_DIRECTORY = "jfrog-cli";
 
     /**
      * Returns the JFrog CLI binary name based on the operating system.
@@ -46,51 +46,66 @@ public class JfInstaller {
      * @return The absolute path of the JFrog executable directory.
      * @throws IOException If an I/O error occurs while creating the directory.
      */
-    private static Path getJfrogExecutableDirectory(String version) throws IOException {
+    private static Path getJfrogExecutableDirectory(String jfrogTmpDir, String version) throws IOException {
+
         Path jfExecDir = version.equals(RELEASE) ?
-                Paths.get(BIN_JFROG_DIRECTORY) :
-                Paths.get(BIN_JFROG_DIRECTORY, version);
+                Paths.get(jfrogTmpDir, JFROG_CLI_DIRECTORY) :
+                Paths.get(jfrogTmpDir, JFROG_CLI_DIRECTORY, version);
         return Files.createDirectories(jfExecDir).toAbsolutePath();
     }
 
     /**
      * Retrieves the JFrog CLI executable path.
      *
-     * @param providedVersion The provided version of JFrog CLI. Use an empty string for the latest version.
-     * @param myBuildLog      The build log.
+     * @param serverConfig The provided Server Config.
+     * @param buildLog     The build log.
      * @return The absolute path of the JFrog CLI executable.
      * @throws IOException If an I/O error occurs while downloading or creating the executable.
      */
-    public static String getJfExecutable(final String providedVersion, BuildLog myBuildLog) throws IOException {
-        myBuildLog.info("Getting JFrog CLI executable...");
+    public static String getJfExecutable(final ServerConfig serverConfig, String jfrogTmpDir, BuildLog buildLog) throws IOException {
+        buildLog.info("Getting JFrog CLI executable...");
 
         // An empty string indicates the latest version.
-        String version = StringUtils.defaultIfBlank(providedVersion, RELEASE);
+        String version = StringUtils.defaultIfBlank(serverConfig.getCliVersion(), RELEASE);
 
-        Path executableLocation = getJfrogExecutableDirectory(version);
+        Path executableLocation = getJfrogExecutableDirectory(jfrogTmpDir, version);
         String binaryName = getJfrogCliBinaryName();
         String executableFullPath = Paths.get(executableLocation.toString(), binaryName).toString();
 
+        // Decide whether to download CLI from releases.jfrog.io or from Artifactory
+        boolean downloadFromReleases = StringUtils.isBlank(serverConfig.getCliRepository());
+        String downloadSourceUrl = downloadFromReleases ? RELEASES_URL : serverConfig.getUrl();
+
         // Downloading executable from Artifactory
-        try (ArtifactoryManager manager = new ArtifactoryManager(RELEASES_ARTIFACTORY_URL, "", "", myBuildLog)) {
-            String cliUrlSuffix = String.format("/%s/v2-jf/%s/jfrog-cli-%s/%s", REPOSITORY, version, OsUtils.getOsDetails(), binaryName);
+        try (ArtifactoryManager manager = new ArtifactoryManager(
+                downloadSourceUrl + "/artifactory",
+                downloadFromReleases ? "" : serverConfig.getUsername(),
+                downloadFromReleases ? "" : serverConfig.getPassword(),
+                downloadFromReleases ? "" : serverConfig.getAccessToken(),
+                buildLog)) {
+            String cliUrlSuffix = String.format("/jfrog-cli/v2-jf/%s/jfrog-cli-%s/%s", version, OsUtils.getOsDetails(), binaryName);
+            if (!downloadFromReleases) {
+                // Should download from configured server. (example: myRepo/artifactory/jfrog-cli/v2-jf/2.37.0/jfrog-cli-mac-386/jf)
+                cliUrlSuffix = String.format("/%s/artifactory%s", serverConfig.getCliRepository(), cliUrlSuffix);
+            }
+
             // Getting updated CLI binary's sha256 from Artifactory.
             String artifactorySha256 = manager.downloadHeader(cliUrlSuffix, DownloadResponse.SHA256_HEADER_NAME);
             // Check whether it's needed to download a new executable or it already exists on the agent.
             if (shouldDownloadTool(executableLocation, artifactorySha256)) {
                 if (version.equals(RELEASE)) {
-                    myBuildLog.info(String.format("Download '%s' latest version from: %s%n", binaryName, RELEASES_ARTIFACTORY_URL + cliUrlSuffix));
+                    buildLog.info(String.format("Download '%s' latest version from: %s%n", binaryName, manager.getUrl() + cliUrlSuffix));
                 } else {
-                    myBuildLog.info(String.format("Download '%s' version %s from: %s%n", binaryName, version, RELEASES_ARTIFACTORY_URL + cliUrlSuffix));
+                    buildLog.info(String.format("Download '%s' version %s from: %s%n", binaryName, version, manager.getUrl() + cliUrlSuffix));
                 }
                 File downloadResponse = manager.downloadToFile(cliUrlSuffix, executableFullPath);
                 if (!downloadResponse.setExecutable(true)) {
                     throw new IOException("No permission to add execution permission to binary");
                 }
-                myBuildLog.info("Successfully downloaded JFrog CLI executable: " + downloadResponse.getPath());
+                buildLog.info("Successfully downloaded JFrog CLI executable: " + downloadResponse.getPath());
                 createSha256File(executableLocation, artifactorySha256);
             } else {
-                myBuildLog.info("Found existing JFrog CLI executable");
+                buildLog.info("Found existing JFrog CLI executable");
             }
             return executableFullPath;
         } catch (IOException e) {
