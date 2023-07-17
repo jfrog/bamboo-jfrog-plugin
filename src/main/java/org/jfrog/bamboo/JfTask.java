@@ -57,11 +57,9 @@ public class JfTask extends JfContext implements TaskType {
         serverConfigManager = ServerConfigManager.getInstance();
         ConfigurationMap confMap = taskContext.getConfigurationMap();
         TaskResultBuilder resultBuilder = TaskResultBuilder.newBuilder(taskContext);
-        String serverId = confMap.get(JF_TASK_SERVER_ID);
-        buildLog.info(JF_TASK_SERVER_ID + ": " + serverId);
-        ServerConfig selectedServerConfig = serverConfigManager.getServerConfigById(serverId);
+        ServerConfig selectedServerConfig = serverConfigManager.getServerConfigById(confMap.get(JF_TASK_SERVER_ID));
         if (selectedServerConfig == null) {
-            buildLog.error("the selected Server ID doesn't exists: " + serverId);
+            buildLog.error("The selected Server ID doesn't exists: " + confMap.get(JF_TASK_SERVER_ID));
             return resultBuilder.failedWithError().build();
         }
         try {
@@ -71,7 +69,7 @@ public class JfTask extends JfContext implements TaskType {
             String jfExecutablePath = JfInstaller.getJfExecutable(selectedServerConfig, jfrogTmpDir, buildLog);
 
             // Create commandRunner to run JFrog CLI commands
-            Map<String, String> envs = createJfrogEnvironmentVariables(taskContext.getBuildContext(), serverId);
+            Map<String, String> envs = createJfrogEnvironmentVariables(taskContext.getBuildContext(), selectedServerConfig);
             File workingDir = getWorkingDirectory(confMap.get(JF_TASK_WORKING_DIRECTORY), taskContext.getWorkingDirectory());
             buildLog.info("Working directory: " + workingDir);
             commandRunner = new ExecutableRunner(jfExecutablePath, workingDir, envs, buildLog);
@@ -83,7 +81,7 @@ public class JfTask extends JfContext implements TaskType {
             }
 
             // Make selected Server ID as default (by 'jf c use')
-            exitCode = commandRunner.run(List.of("config", "use", serverId));
+            exitCode = commandRunner.run(List.of("config", "use", selectedServerConfig.getServerId()));
             if (exitCode != 0) {
                 return resultBuilder.failedWithError().build();
             }
@@ -133,11 +131,11 @@ public class JfTask extends JfContext implements TaskType {
      * Creates the JFrog CLI environment variables.
      *
      * @param buildContext The build context.
-     * @param serverId     The server ID.
+     * @param serverConfig The selected server config.
      * @return The JFrog CLI environment variables.
      * @throws IOException If an I/O error occurs.
      */
-    public Map<String, String> createJfrogEnvironmentVariables(BuildContext buildContext, String serverId) throws IOException {
+    public Map<String, String> createJfrogEnvironmentVariables(BuildContext buildContext, ServerConfig serverConfig) throws IOException {
         Map<String, String> jfEnvs = new HashMap<>() {
             public String put(String key, String value) {
                 if (StringUtils.isBlank(System.getProperty(key))) {
@@ -147,7 +145,7 @@ public class JfTask extends JfContext implements TaskType {
             }
         };
 
-        jfEnvs.put("JFROG_CLI_SERVER_ID", serverId);
+        jfEnvs.put("JFROG_CLI_SERVER_ID", serverConfig.getServerId());
         jfEnvs.put("JFROG_CLI_BUILD_NAME", buildContext.getPlanName());
         jfEnvs.put("JFROG_CLI_BUILD_NUMBER", String.valueOf(buildContext.getBuildNumber()));
 
@@ -157,6 +155,11 @@ public class JfTask extends JfContext implements TaskType {
 
         // Agent persistent directory to store the JFrog CLI executable and build-info extractors.
         jfEnvs.put("JFROG_CLI_DEPENDENCIES_DIR", BambooUtils.getJfrogTmpSubdir(customVariableContext, "dependencies"));
+
+        if (StringUtils.isNotBlank(serverConfig.getCliRepository())) {
+            // Configured Artifactory repository name from which to download the jar needed by the mvn/gradle command.
+            jfEnvs.put("JFROG_CLI_RELEASES_REPO", serverConfig.getServerId() + "/" + serverConfig.getCliRepository());
+        }
 
         String buildUrl = BambooUtils.createBambooBuildUrl(fullBuildKey, administrationConfiguration, administrationConfigurationAccessor);
         jfEnvs.put("JFROG_CLI_BUILD_URL", buildUrl);
