@@ -69,8 +69,6 @@ pipelines:
             - ./jf ds rbd ecosystem-jfrog-bamboo-plugin $NEXT_VERSION --site="releases.jfrog.io" --sync
 
             # Update next development version
-            - git checkout master
-            - git merge origin/release
             - env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME ./jf mvn versions:set -DnewVersion=$NEXT_DEVELOPMENT_VERSION -B
 
             # Commit all changes to master
