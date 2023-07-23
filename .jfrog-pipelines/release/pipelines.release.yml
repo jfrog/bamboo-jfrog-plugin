@@ -21,7 +21,7 @@ pipelines:
             - name: bambooReleaseGit
           integrations:
             - name: il_automation
-            - name: entplus_deployer
+            - name: ecosys_entplus_deployer
         execution:
           onExecute:
             - cd $res_bambooReleaseGit_resourcePath
