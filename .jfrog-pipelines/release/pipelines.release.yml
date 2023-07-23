@@ -18,7 +18,7 @@ pipelines:
         type: Bash
         configuration:
           inputResources:
-            - name: bambooReleaseGit
+            - name: jfrogBambooReleaseGit
           integrations:
             - name: il_automation
             - name: ecosys_entplus_deployer
