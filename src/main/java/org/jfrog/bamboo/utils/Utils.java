@@ -49,7 +49,7 @@ public class Utils {
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
 
-            if (c == ' ' && !insideDoubleQuotes && !insideSingleQuotes) {
+            if (StringUtils.isWhitespace(String.valueOf(c)) && !insideDoubleQuotes && !insideSingleQuotes) {
                 if (token.length() > 0) {
                     tokens.add(token.toString());
                     token.setLength(0);
