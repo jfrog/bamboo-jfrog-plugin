@@ -46,8 +46,7 @@ public class Utils {
         boolean insideDoubleQuotes = false;
         boolean insideSingleQuotes = false;
 
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
+        for (char c : input.toCharArray()) {
 
             if (StringUtils.isWhitespace(String.valueOf(c)) && !insideDoubleQuotes && !insideSingleQuotes) {
                 if (token.length() > 0) {
