@@ -14,7 +14,7 @@ pipelines:
         type: Bash
         configuration:
           inputResources:
-            - name: bambooSnapshotGit
+            - name: jfrogBambooSnapshotGit
           integrations:
             - name: entplus_deployer
         execution:
