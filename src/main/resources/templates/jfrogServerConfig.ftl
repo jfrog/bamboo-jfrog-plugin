@@ -13,7 +13,7 @@
 
 [#assign cancelUri = '/admin/jfrogConfiguration.action' /]
 
-[@ww.form action=targetAction id="myform" title='JFrog Platform Configuration' descriptionKey='' submitLabelKey='global.buttons.update' cancelUri='/admin/jfrogConfiguration.action' showActionErrors='true']
+[@ww.form action=targetAction id="myform" title='JFrog Platform Configuration' submitLabelKey='global.buttons.update' cancelUri='/admin/jfrogConfiguration.action' showActionErrors='true']
     [@ww.param name='buttons']
         [@ww.submit value="Test Connection" name="testConnection" /]
     [/@ww.param]
@@ -48,7 +48,7 @@
                 [@ww.radio fieldValue='false' label="Latest version" name='specificVersion' toggle='true' template='radio.ftl' /]
                 [@ww.radio fieldValue='true' label="Select version" name='specificVersion' toggle='true' template='radio.ftl' /]
                 [@ui.bambooSection dependsOn='specificVersion' showOn='true']
-                    [@ww.textfield description='Enter specific JFrog CLI version' label='JFrog CLI Version'                        name="cliVersion"                    /]
+                    [@ww.textfield description='Enter specific JFrog CLI version' label='JFrog CLI Version' name="cliVersion" /]
                 [/@ui.bambooSection]
             [/@ui.bambooSection]
             <br>
@@ -56,7 +56,7 @@
                 [@ww.radio fieldValue='false' label="Download JFrog CLI from releases.jfrog.io" name='fromArtifactory' toggle='true' template='radio.ftl' /]
                 [@ww.radio fieldValue='true' label="Download JFrog CLI from the configured Artifactory instance" name='fromArtifactory' toggle='true' template='radio.ftl' /]
                 [@ui.bambooSection dependsOn='fromArtifactory' showOn='true']
-                    [@ww.textfield description='Set the name of a Remote or a Virtual repository in your Artifactory instance, to download JFrog CLI from the Remote Repository set here (or the Remote Repository included in the Virtual Repository set here) should proxy https://releases.jfrog.io'                        label='Source Artifactory Repository'                        name="cliRepository"                    /]
+                    [@ww.textfield description='Set the name of a Remote or a Virtual repository in your Artifactory instance, to download JFrog CLI from the Remote Repository set here (or the Remote Repository included in the Virtual Repository set here) should proxy https://releases.jfrog.io' label='Repository Name' name="cliRepository" /]
                 [/@ui.bambooSection]
             [/@ui.bambooSection]
 
