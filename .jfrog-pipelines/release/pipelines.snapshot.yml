@@ -22,7 +22,7 @@ pipelines:
             # Save gradle cache
             - restore_cache_files m2_home ${HOME}/.m2
           onExecute:
-            - cd $res_bambooSnapshotGit_resourcePath
+            - cd $res_jfrogBambooSnapshotGit_resourcePath
 
             # Set env
             - export CI=true
