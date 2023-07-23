@@ -47,7 +47,6 @@ public class JfInstaller {
      * @throws IOException If an I/O error occurs while creating the directory.
      */
     private static Path getJfrogExecutableDirectory(String jfrogTmpDir, String version) throws IOException {
-
         Path jfExecDir = version.equals(RELEASE) ?
                 Paths.get(jfrogTmpDir, JFROG_CLI_DIRECTORY) :
                 Paths.get(jfrogTmpDir, JFROG_CLI_DIRECTORY, version);

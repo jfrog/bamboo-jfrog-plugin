@@ -1,5 +1,5 @@
 pipelines:
-  - name: release_bamboo
+  - name: release_jfrog_bamboo
     configuration:
       runtime:
         type: image
@@ -18,10 +18,10 @@ pipelines:
         type: Bash
         configuration:
           inputResources:
-            - name: bambooReleaseGit
+            - name: jfrogBambooReleaseGit
           integrations:
             - name: il_automation
-            - name: entplus_deployer
+            - name: ecosys_entplus_deployer
         execution:
           onExecute:
             - cd $res_bambooReleaseGit_resourcePath
@@ -34,7 +34,7 @@ pipelines:
             - export JFROG_CLI_BUILD_PROJECT=ecosys
 
             # Configure git
-            - git checkout release
+            - git checkout main
             - git remote set-url origin https://$int_il_automation_token@github.com/jfrog/bamboo-jfrog-plugin.git
 
             # Make sure versions provided
@@ -45,18 +45,14 @@ pipelines:
             # Configure JFrog CLI
             - curl -fL https://install-cli.jfrog.io | sh && chmod +x ./jf
             - ./jf c rm --quiet
-            - ./jf c add internal --url=$int_entplus_deployer_url --user=$int_entplus_deployer_user --password=$int_entplus_deployer_apikey
+            - ./jf c add internal --url=$int_ecosys_entplus_deployer_url --user=$int_ecosys_entplus_deployer_user --password=$int_ecosys_entplus_deployer_apikey
             - ./jf mvnc --repo-resolve-releases ecosys-bamboo-repos --repo-resolve-snapshots ecosys-releases-snapshots --repo-deploy-snapshots ecosys-oss-snapshot-local --repo-deploy-releases ecosys-oss-release-local
 
-            # Sync changes with master
-            - git merge origin/master
 
             # Update version
             - env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME ./jf mvn versions:set -DnewVersion="${NEXT_VERSION}" -B
             - git commit -am "[artifactory-release] Release version ${NEXT_VERSION} [skipRun]" --allow-empty
             - git tag ${NEXT_VERSION}
-            - git push
-            - git push --tags
 
             # Run install and publish
             - >
@@ -73,14 +69,13 @@ pipelines:
             - ./jf ds rbd ecosystem-jfrog-bamboo-plugin $NEXT_VERSION --site="releases.jfrog.io" --sync
 
             # Update next development version
-            - git checkout master
-            - git merge origin/release
             - env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME ./jf mvn versions:set -DnewVersion=$NEXT_DEVELOPMENT_VERSION -B
 
             # Commit all changes to master
             - git clean -fd
             - git commit -am "[artifactory-release] Next development version [skipRun]"
             - git push
+            - git push --tags
 
           onComplete:
             # Show tests in the *Tests* tab
