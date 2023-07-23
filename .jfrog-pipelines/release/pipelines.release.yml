@@ -34,7 +34,7 @@ pipelines:
             - export JFROG_CLI_BUILD_PROJECT=ecosys
 
             # Configure git
-            - git checkout release
+            - git checkout main
             - git remote set-url origin https://$int_il_automation_token@github.com/jfrog/bamboo-jfrog-plugin.git
 
             # Make sure versions provided
