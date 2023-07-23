@@ -79,6 +79,7 @@ pipelines:
             - git clean -fd
             - git commit -am "[artifactory-release] Next development version [skipRun]"
             - git push
+            - git push --tags
 
           onComplete:
             # Show tests in the *Tests* tab
