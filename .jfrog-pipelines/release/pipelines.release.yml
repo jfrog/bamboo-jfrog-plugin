@@ -1,5 +1,5 @@
 pipelines:
-  - name: release_bamboo
+  - name: release_jfrog_bamboo
     configuration:
       runtime:
         type: image
