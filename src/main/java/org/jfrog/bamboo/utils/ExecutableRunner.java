@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.jfrog.build.extractor.UrlUtils.removeCredentialsFromUrl;
 
@@ -21,6 +22,7 @@ public class ExecutableRunner {
     private final Map<String, String> envs;
     private final BuildLog buildLog;
     private final List<String> secrets;
+    private final int COMMAND_TIMEOUT = 45; // minutes
 
 
     /**
@@ -60,18 +62,37 @@ public class ExecutableRunner {
         buildLog.info("Running command: " + maskSecrets(String.join(" ", processBuilder.command())));
 
         Process process = processBuilder.start();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                buildLog.info(maskSecrets(line));
-            }
-        }
 
-        int exitCode = process.waitFor();
-        if (exitCode != 0) {
-            buildLog.error("Command failed with exit code: " + exitCode);
+        Thread outputReader = new Thread(() -> {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    buildLog.info(maskSecrets(line));
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        // Start the output reader thread
+        outputReader.start();
+
+        // Wait for the process to complete with a timeout of 30 minutes
+        if (process.waitFor(COMMAND_TIMEOUT, TimeUnit.MINUTES)) {
+            // Process completed within the timeout
+            outputReader.join(); // Wait for the output reader thread to finish
+            int exitCode = process.exitValue();
+            if (exitCode != 0) {
+                buildLog.error("Command failed with exit code: " + exitCode);
+            }
+            return exitCode;
+        } else {
+            // Timeout occurred, terminate the process and the output reader thread
+            process.destroy();
+            outputReader.interrupt();
+            buildLog.error("Command timed out after " + COMMAND_TIMEOUT + " minutes");
+            return -1; // Set a custom exit code to indicate timeout
         }
-        return exitCode;
     }
 
     /**
