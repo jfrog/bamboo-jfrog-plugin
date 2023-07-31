@@ -45,7 +45,7 @@
         [@ui.bambooSection title='JFrog CLI Settings' collapsible=true headerWeight="h3"]
 
             [@ui.bambooSection title='JFrog CLI Version']
-                [@ww.radio fieldValue='false' label="Latest version" name='specificVersion' toggle='true' template='radio.ftl' /]
+                [@ww.radio fieldValue='false' label="Default version" name='specificVersion' toggle='true' template='radio.ftl' /]
                 [@ww.radio fieldValue='true' label="Select version" name='specificVersion' toggle='true' template='radio.ftl' /]
                 [@ui.bambooSection dependsOn='specificVersion' showOn='true']
                     [@ww.textfield description='Enter specific JFrog CLI version' label='JFrog CLI Version' name="cliVersion" /]

@@ -12,8 +12,6 @@ import com.atlassian.bamboo.variable.CustomVariableContext;
 import com.atlassian.plugin.PluginAccessor;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.bamboo.config.ServerConfig;
 import org.jfrog.bamboo.config.ServerConfigManager;
@@ -36,7 +34,6 @@ import java.util.stream.Collectors;
  * JFrog CLI Task.
  */
 public class JfTask extends JfContext implements TaskType {
-    private static final Logger log = LogManager.getLogger(JfTask.class);
     private BuildLog buildLog;
     private ServerConfigManager serverConfigManager;
     private ExecutableRunner commandRunner;
@@ -53,7 +50,7 @@ public class JfTask extends JfContext implements TaskType {
      */
     @Override
     public @NotNull TaskResult execute(final @NotNull TaskContext taskContext) {
-        buildLog = new BuildLog(log, taskContext.getBuildLogger());
+        buildLog = new BuildLog(taskContext.getBuildLogger());
         serverConfigManager = ServerConfigManager.getInstance();
         ConfigurationMap confMap = taskContext.getConfigurationMap();
         TaskResultBuilder resultBuilder = TaskResultBuilder.newBuilder(taskContext);
@@ -72,7 +69,8 @@ public class JfTask extends JfContext implements TaskType {
             Map<String, String> envs = createJfrogEnvironmentVariables(taskContext.getBuildContext(), selectedServerConfig);
             File workingDir = getWorkingDirectory(confMap.get(JF_TASK_WORKING_DIRECTORY), taskContext.getWorkingDirectory());
             buildLog.info("Working directory: " + workingDir);
-            commandRunner = new ExecutableRunner(jfExecutablePath, workingDir, envs, buildLog);
+            List<String> secrets = List.of(selectedServerConfig.getPassword(), selectedServerConfig.getAccessToken());
+            commandRunner = new ExecutableRunner(jfExecutablePath, workingDir, envs, secrets, buildLog);
 
             // Run 'jf config add' and 'jf config use' commands.
             int exitCode = configAllJFrogServers();
@@ -144,7 +142,6 @@ public class JfTask extends JfContext implements TaskType {
                 return "";
             }
         };
-
         jfEnvs.put("JFROG_CLI_SERVER_ID", serverConfig.getServerId());
         jfEnvs.put("JFROG_CLI_BUILD_NAME", buildContext.getPlanName());
         jfEnvs.put("JFROG_CLI_BUILD_NUMBER", String.valueOf(buildContext.getBuildNumber()));

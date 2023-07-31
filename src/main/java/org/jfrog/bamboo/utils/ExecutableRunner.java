@@ -1,5 +1,7 @@
 package org.jfrog.bamboo.utils;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -16,6 +18,8 @@ public class ExecutableRunner {
     private final String executable;
     private final Map<String, String> envs;
     private final BuildLog buildLog;
+    private final List<String> secrets;
+
 
     /**
      * Constructs an ExecutableRunner object.
@@ -25,11 +29,12 @@ public class ExecutableRunner {
      * @param envs       Additional environment variables to set for the command execution.
      * @param buildLog   The logger for capturing command output and logs.
      */
-    public ExecutableRunner(String executable, File workingDir, Map<String, String> envs, BuildLog buildLog) {
+    public ExecutableRunner(String executable, File workingDir, Map<String, String> envs, List<String> secrets, BuildLog buildLog) {
         this.executable = executable;
         this.workingDir = workingDir;
         this.envs = envs;
         this.buildLog = buildLog;
+        this.secrets = secrets;
     }
 
     /**
@@ -56,7 +61,7 @@ public class ExecutableRunner {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                buildLog.info(line);
+                buildLog.info(maskSecrets(line));
             }
         }
 
@@ -74,7 +79,14 @@ public class ExecutableRunner {
      * @return The argument string with masked secrets.
      */
     private String maskSecrets(String arg) {
-        return arg.replaceAll("--password=\\S+", "--password=***")
-                .replaceAll("--access-token=\\S+", "--access-token=***");
+        if (secrets != null && !secrets.isEmpty()) {
+            for (String secret : secrets) {
+                if (StringUtils.isNotBlank(secret)) {
+                    arg = arg.replaceAll(secret, "***");
+                }
+            }
+        }
+        String regex = "--(password|access-token)=\\S+";
+        return arg.replaceAll(regex, "--$1=***");
     }
 }

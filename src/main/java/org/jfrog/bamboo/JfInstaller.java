@@ -19,6 +19,7 @@ import java.nio.file.Paths;
  */
 public class JfInstaller {
     private static final String RELEASE = "[RELEASE]";
+    private static final String DEFAULT_CLI_VERSION = "2.44.0";
     public static final String RELEASES_URL = "https://releases.jfrog.io";
     public static final String BINARY_NAME = "jf";
     private static final String SHA256_FILE_NAME = "sha256";
@@ -63,16 +64,16 @@ public class JfInstaller {
      */
     public static String getJfExecutable(final ServerConfig serverConfig, String jfrogTmpDir, BuildLog buildLog) throws IOException {
         buildLog.info("Getting JFrog CLI executable...");
+        boolean downloadFromReleases = StringUtils.isBlank(serverConfig.getCliRepository());
 
         // An empty string indicates the latest version.
-        String version = StringUtils.defaultIfBlank(serverConfig.getCliVersion(), RELEASE);
+        String version = StringUtils.defaultIfBlank(serverConfig.getCliVersion(), downloadFromReleases ? RELEASE : DEFAULT_CLI_VERSION);
 
         Path executableLocation = getJfrogExecutableDirectory(jfrogTmpDir, version);
         String binaryName = getJfrogCliBinaryName();
         String executableFullPath = Paths.get(executableLocation.toString(), binaryName).toString();
 
         // Decide whether to download CLI from releases.jfrog.io or from Artifactory
-        boolean downloadFromReleases = StringUtils.isBlank(serverConfig.getCliRepository());
         String downloadSourceUrl = downloadFromReleases ? RELEASES_URL : serverConfig.getUrl();
 
         // Downloading executable from Artifactory
@@ -87,7 +88,6 @@ public class JfInstaller {
                 // Should download from configured server. (example: myRepo/artifactory/jfrog-cli/v2-jf/2.37.0/jfrog-cli-mac-386/jf)
                 cliUrlSuffix = String.format("/%s/artifactory%s", serverConfig.getCliRepository(), cliUrlSuffix);
             }
-
             // Getting updated CLI binary's sha256 from Artifactory.
             String artifactorySha256 = manager.downloadHeader(cliUrlSuffix, DownloadResponse.SHA256_HEADER_NAME);
             // Check whether it's needed to download a new executable or it already exists on the agent.

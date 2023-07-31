@@ -144,7 +144,7 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
 
     private void testConnection() {
         ServerConfig serverConfig = createServerConfig();
-        try (ArtifactoryManager manager = new ArtifactoryManager(serverConfig.getUrl() + "/artifactory", serverConfig.getUsername(), serverConfig.getPassword(), serverConfig.getAccessToken(), new BuildLog(log))) {
+        try (ArtifactoryManager manager = new ArtifactoryManager(serverConfig.getUrl() + "/artifactory", serverConfig.getUsername(), serverConfig.getPassword(), serverConfig.getAccessToken(), new BuildLog())) {
             ArtifactoryVersion rtVersion = manager.getVersion();
             if (rtVersion == null || rtVersion.equals(ArtifactoryVersion.NOT_FOUND)) {
                 addActionError("Couldn't reach JFrog Artifactory server");
@@ -164,7 +164,7 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
                 authType.equals(AUTH_TYPE_BASIC) ? username : "",
                 authType.equals(AUTH_TYPE_BASIC) ? password : "",
                 authType.equals(AUTH_TYPE_TOKEN) ? accessToken : "",
-                specificVersion ? cliVersion : "",
+                specificVersion ? StringUtils.removeStart(cliVersion, "v") : "",
                 fromArtifactory ? cliRepository : ""
         );
     }
