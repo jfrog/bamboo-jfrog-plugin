@@ -22,7 +22,7 @@ public class ExecutableRunner {
     private final Map<String, String> envs;
     private final BuildLog buildLog;
     private final List<String> secrets;
-    private final int COMMAND_TIMEOUT = 45; // minutes
+    private static final int COMMAND_TIMEOUT = 45; // minutes
 
 
     /**
