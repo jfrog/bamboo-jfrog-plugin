@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.jfrog.build.extractor.UrlUtils.removeCredentialsFromUrl;
+
 /**
  * Utility class for running executable commands.
  */
@@ -87,6 +89,7 @@ public class ExecutableRunner {
             }
         }
         String regex = "--(password|access-token)=\\S+";
-        return arg.replaceAll(regex, "--$1=***");
+        arg = arg.replaceAll(regex, "--$1=***");
+        return removeCredentialsFromUrl(arg);
     }
 }
