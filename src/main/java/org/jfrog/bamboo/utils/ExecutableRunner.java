@@ -24,7 +24,6 @@ public class ExecutableRunner {
     private final List<String> secrets;
     private static final int COMMAND_TIMEOUT = 45; // minutes
 
-
     /**
      * Constructs an ExecutableRunner object.
      *
