@@ -77,19 +77,19 @@ public class ExecutableRunner {
     /**
      * Masks secret values in the given argument string.
      *
-     * @param arg The argument string to mask secrets in.
+     * @param line The argument string to mask secrets in.
      * @return The argument string with masked secrets.
      */
-    private String maskSecrets(String arg) {
+    private String maskSecrets(String line) {
         if (secrets != null && !secrets.isEmpty()) {
             for (String secret : secrets) {
                 if (StringUtils.isNotBlank(secret)) {
-                    arg = arg.replaceAll(secret, "***");
+                    line = line.replaceAll(secret, "***");
                 }
             }
         }
         String regex = "--(password|access-token)=\\S+";
-        arg = arg.replaceAll(regex, "--$1=***");
-        return removeCredentialsFromUrl(arg);
+        line = line.replaceAll(regex, "--$1=***");
+        return removeCredentialsFromUrl(line);
     }
 }
