@@ -1,0 +1,82 @@
+pipelines:
+  - name: release_jfrog_bamboo
+    configuration:
+      runtime:
+        type: image
+        image:
+          auto:
+            language: java
+            versions:
+              - "11.0.0"
+      environmentVariables:
+        readOnly:
+          NEXT_VERSION: 0.0.0
+          NEXT_DEVELOPMENT_VERSION: 0.0.x-SNAPSHOT
+
+    steps:
+      - name: Release
+        type: Bash
+        configuration:
+          inputResources:
+            - name: jfrogBambooReleaseGit
+          integrations:
+            - name: il_automation
+            - name: ecosys_entplus_deployer
+        execution:
+          onExecute:
+            - cd $res_bambooReleaseGit_resourcePath
+
+            # Set env
+            - export CI=true
+            - export JFROG_BUILD_STATUS=PASS
+            - export JFROG_CLI_BUILD_NAME=ecosystem-jfrog-bamboo-plugin-release
+            - export JFROG_CLI_BUILD_NUMBER=$run_number
+            - export JFROG_CLI_BUILD_PROJECT=ecosys
+
+            # Configure git
+            - git checkout main
+            - git remote set-url origin https://$int_il_automation_token@github.com/jfrog/bamboo-jfrog-plugin.git
+
+            # Make sure versions provided
+            - echo "Checking variables"
+            - test -n "$NEXT_VERSION" -a "$NEXT_VERSION" != "0.0.0"
+            - test -n "$NEXT_DEVELOPMENT_VERSION" -a "$NEXT_DEVELOPMENT_VERSION" != "0.0.0"
+
+            # Configure JFrog CLI
+            - curl -fL https://install-cli.jfrog.io | sh && chmod +x ./jf
+            - ./jf c rm --quiet
+            - ./jf c add internal --url=$int_ecosys_entplus_deployer_url --user=$int_ecosys_entplus_deployer_user --password=$int_ecosys_entplus_deployer_apikey
+            - ./jf mvnc --repo-resolve-releases ecosys-bamboo-repos --repo-resolve-snapshots ecosys-releases-snapshots --repo-deploy-snapshots ecosys-oss-snapshot-local --repo-deploy-releases ecosys-oss-release-local
+
+
+            # Update version
+            - env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME ./jf mvn versions:set -DnewVersion="${NEXT_VERSION}" -B
+            - git commit -am "[artifactory-release] Release version ${NEXT_VERSION} [skipRun]" --allow-empty
+            - git tag ${NEXT_VERSION}
+
+            # Run install and publish
+            - >
+              env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME
+              JFROG_CLI_BUILD_NAME=$JFROG_CLI_BUILD_NAME
+              JFROG_CLI_BUILD_NUMBER=$JFROG_CLI_BUILD_NUMBER
+              JFROG_CLI_BUILD_PROJECT=$JFROG_CLI_BUILD_PROJECT
+              ./jf mvn clean install -U -B
+            - ./jf rt bag && ./jf rt bce
+            - ./jf rt bp
+
+            # Distribute release bundle
+            - ./jf ds rbc ecosystem-jfrog-bamboo-plugin $NEXT_VERSION --spec=./ci/release/specs/prod-rbc-filespec.json --spec-vars="version=$NEXT_VERSION" --sign
+            - ./jf ds rbd ecosystem-jfrog-bamboo-plugin $NEXT_VERSION --site="releases.jfrog.io" --sync
+
+            # Update next development version
+            - env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME ./jf mvn versions:set -DnewVersion=$NEXT_DEVELOPMENT_VERSION -B
+
+            # Commit all changes to master
+            - git clean -fd
+            - git commit -am "[artifactory-release] Next development version [skipRun]"
+            - git push
+            - git push --tags
+
+          onComplete:
+            # Show tests in the *Tests* tab
+            - save_tests $res_bambooReleaseGit_resourcePath/target/surefire-reports/

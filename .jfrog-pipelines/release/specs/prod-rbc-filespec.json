@@ -1,0 +1,8 @@
+{
+  "files": [
+    {
+      "pattern": "ecosys-oss-release-local/(org/jfrog/bamboo/bamboo-jfrog-plugin/${version}/bamboo-jfrog-plugin-*)",
+      "target": "oss-release-local/{1}"
+    }
+  ]
+}
