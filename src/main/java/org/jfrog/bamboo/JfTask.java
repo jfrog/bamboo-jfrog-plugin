@@ -98,7 +98,7 @@ public class JfTask extends JfContext implements TaskType {
             if (exitCode != 0) {
                 return resultBuilder.failedWithError().build();
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (Exception e) {
             buildLog.error(ExceptionUtils.getRootCauseMessage(e), e);
             return resultBuilder.failedWithError().build();
         }
