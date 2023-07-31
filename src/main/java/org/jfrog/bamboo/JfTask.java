@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 /**
@@ -99,7 +98,7 @@ public class JfTask extends JfContext implements TaskType {
             if (exitCode != 0) {
                 return resultBuilder.failedWithError().build();
             }
-        } catch (IOException | InterruptedException | TimeoutException e) {
+        } catch (IOException | InterruptedException e) {
             buildLog.error(ExceptionUtils.getRootCauseMessage(e), e);
             return resultBuilder.failedWithError().build();
         }
@@ -176,7 +175,7 @@ public class JfTask extends JfContext implements TaskType {
      * @throws IOException          If an I/O error occurs.
      * @throws InterruptedException If the execution is interrupted.
      */
-    private int configAllJFrogServers() throws IOException, InterruptedException, TimeoutException {
+    private int configAllJFrogServers() throws IOException, InterruptedException {
         int exitCode = 0;
         for (ServerConfig serverConfig : serverConfigManager.getAllServerConfigs()) {
             exitCode = runJFrogCliConfigAddCommand(serverConfig);
