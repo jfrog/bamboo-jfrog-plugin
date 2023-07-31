@@ -22,7 +22,7 @@ public class ExecutableRunner {
     private final Map<String, String> envs;
     private final BuildLog buildLog;
     private final List<String> secrets;
-    private static final int COMMAND_TIMEOUT = 45; // minutes
+    private static final int COMMAND_TIMEOUT = 60;
 
     /**
      * Constructs an ExecutableRunner object.
@@ -76,7 +76,7 @@ public class ExecutableRunner {
         // Start the output reader thread
         outputReader.start();
 
-        // Wait for the process to complete with a timeout of 30 minutes
+        // Wait for the process to complete with a timeout of 60 minutes
         if (process.waitFor(COMMAND_TIMEOUT, TimeUnit.MINUTES)) {
             // Process completed within the timeout
             outputReader.join(); // Wait for the output reader thread to finish
