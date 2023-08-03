@@ -36,7 +36,7 @@ public class OsUtils {
         }
         // Mac
         if (SystemUtils.IS_OS_MAC) {
-            return OS_ARCH.contains("arm64") ? "mac-arm64" : "mac-386";
+            return OS_ARCH.contains("arm64") || OS_ARCH.contains("aarch64") ? "mac-arm64" : "mac-386";
         }
         // Unix
         switch (OS_ARCH) {
