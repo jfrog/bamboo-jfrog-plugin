@@ -55,11 +55,10 @@ public class JfContext extends AbstractTaskConfigurator {
         super.validate(params, errorCollection);
         String cliCommand = params.getString(JF_TASK_COMMAND);
         if (!StringUtils.startsWith(StringUtils.trim(cliCommand), "jf ")) {
-            errorCollection.addErrorMessage("JFrog CLI command should start with 'jf '");
+            errorCollection.addErrorMessage("JFrog CLI command should start with 'jf '.");
         }
-
-        if (StringUtils.isBlank(JF_TASK_SERVER_ID)) {
-            errorCollection.addErrorMessage("JFrog configuration should be selected.");
+        if (StringUtils.isBlank(params.getString(JF_TASK_SERVER_ID))) {
+            errorCollection.addErrorMessage("JFrog configuration should be selected");
         }
     }
 }
