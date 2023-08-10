@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.jfrog.bamboo</groupId>
     <artifactId>bamboo-jfrog-plugin</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.2</version>
 
     <organization>
         <name>JFrog Ltd</name>
@@ -30,7 +30,7 @@
     <packaging>atlassian-plugin</packaging>
 
     <properties>
-        <bamboo.version>9.3.1</bamboo.version>
+        <bamboo.version>9.3.2</bamboo.version>
         <bamboo.data.version>${bamboo.version}</bamboo.data.version>
         <amps.version>8.10.1</amps.version>
         <plugin.testrunner.version>2.0.3</plugin.testrunner.version>
