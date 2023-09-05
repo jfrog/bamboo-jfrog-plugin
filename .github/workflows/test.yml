@@ -8,7 +8,7 @@ jobs:
       
     steps:
       - name: Test
-        run: echo ${{ github.event.pull_request.author_association }}
+        run: echo ${{ github.event.pull_request }}
         
       - name: Test2
-        run: echo ${{ github.event.pull_request_target.author_association }}        
+        run: echo ${{ github.event.pull_request.sender }}        
