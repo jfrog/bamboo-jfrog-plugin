@@ -15,7 +15,7 @@
 
 ## Overview
 
-The **Bamboo JFrog Plugin** is designed to provide an easy integration between Bamboo and
+The [Bamboo JFrog Plugin](https://marketplace.atlassian.com/apps/1231543/jfrog-for-bamboo) is designed to provide an easy integration between Bamboo and
 the [JFrog Platform](https://jfrog.com/solution-sheet/jfrog-platform/).
 
 Unlike the legacy [Bamboo Artifactory Plugin](https://plugins.atlassian.com/plugin/details/27818), the new **Bamboo
