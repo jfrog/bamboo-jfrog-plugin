@@ -8,7 +8,11 @@ jobs:
       
     steps:
       - name: Test
-        run: echo ${{ github.event.pull_request }}
+        run: |
+          echo ${{ github.event.pull_request }} > file.json
+          cat file.json
         
       - name: Test2
-        run: echo ${{ github.event.pull_request.sender }}        
+        run: |
+          echo ${{ github.event.pull_request.sender }} > file2.json 
+          cat file2.json
