@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -57,6 +58,8 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
             addFieldError("serverId", "Please specify a Server ID identifier.");
         } else if (MODE_ADD.equals(mode) && serverConfigManager.getServerConfigById(serverId) != null) {
             addFieldError("serverId", "Server ID already exists.");
+        } else if (!serverId.equals(StringEscapeUtils.escapeHtml4(serverId))) {
+            addFieldError("serverId", "Server ID cannot contain html content");
         }
 
         if (StringUtils.isBlank(url)) {
