@@ -30,18 +30,18 @@
     <packaging>atlassian-plugin</packaging>
 
     <properties>
-        <bamboo.version>9.3.2</bamboo.version>
+        <bamboo.version>9.3.3</bamboo.version>
         <bamboo.data.version>${bamboo.version}</bamboo.data.version>
-        <amps.version>8.10.1</amps.version>
-        <plugin.testrunner.version>2.0.3</plugin.testrunner.version>
-        <atlassian.spring.scanner.version>3.0.2</atlassian.spring.scanner.version>
+        <amps.version>8.11.4</amps.version>
+        <atlassian.spring.scanner.version>3.0.3</atlassian.spring.scanner.version>
         <!-- This property ensures consistency between the key in atlassian-plugin.xml and the OSGi bundle's key. -->
         <atlassian.plugin.key>${project.groupId}.${project.artifactId}</atlassian.plugin.key>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>11</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <buildinfo.version>2.41.1</buildinfo.version>
+        <!-- https://mvnrepository.com/artifact/org.jfrog.buildinfo/build-info-extractor -->
+        <buildinfo.version>2.41.6</buildinfo.version>
     </properties>
 
     <profiles>
