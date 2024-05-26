@@ -103,8 +103,7 @@ public class JfTask extends JfContext implements TaskType {
             buildLog.error(ExceptionUtils.getRootCauseMessage(e), e);
             return resultBuilder.failedWithError().build();
         }
-        removeJfrogTempDir();
-        return resultBuilder.success().build();
+        return cleanUpTask(resultBuilder);
     }
 
     /**
@@ -193,12 +192,16 @@ public class JfTask extends JfContext implements TaskType {
      * This function is intentionally not part of the PostBuildAction
      * because it lacks the necessary permissions to delete the directory
      * when the build is executed on a remote agent.
+     *
+     * @return TaskResult status indicating the success of the cleanup.
      */
-    private void removeJfrogTempDir() {
+    private @NotNull TaskResult cleanUpTask(TaskResultBuilder resultBuilder) {
         try {
             FileUtils.deleteDirectory(BambooUtils.getJfrogTmpDir(customVariableContext));
+            return resultBuilder.success().build();
         } catch (IOException e) {
             buildLog.error("Failed to delete JFrog temporary directory: " + e.getMessage());
+            return resultBuilder.failedWithError().build();
         }
     }
 
