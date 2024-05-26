@@ -12,6 +12,7 @@ import com.atlassian.bamboo.variable.CustomVariableContext;
 import com.atlassian.plugin.PluginAccessor;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.codehaus.plexus.util.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.bamboo.config.ServerConfig;
 import org.jfrog.bamboo.config.ServerConfigManager;
@@ -102,6 +103,7 @@ public class JfTask extends JfContext implements TaskType {
             buildLog.error(ExceptionUtils.getRootCauseMessage(e), e);
             return resultBuilder.failedWithError().build();
         }
+        removeJfrogTempDir();
         return resultBuilder.success().build();
     }
 
@@ -184,6 +186,20 @@ public class JfTask extends JfContext implements TaskType {
             }
         }
         return exitCode;
+    }
+
+    /**
+     * Removes the JFrog temporary directory that was previously created.
+     * This function is intentionally not part of the PostBuildAction
+     * because it lacks the necessary permissions to delete the directory
+     * when the build is executed on a remote agent.
+     */
+    private void removeJfrogTempDir() {
+        try {
+            FileUtils.deleteDirectory(BambooUtils.getJfrogTmpDir(customVariableContext));
+        } catch (IOException e) {
+            buildLog.error("Failed to delete JFrog temporary directory: " + e.getMessage());
+        }
     }
 
     /**
