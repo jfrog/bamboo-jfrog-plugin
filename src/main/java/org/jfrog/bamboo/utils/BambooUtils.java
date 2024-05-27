@@ -3,9 +3,11 @@ package org.jfrog.bamboo.utils;
 import com.atlassian.bamboo.configuration.AdministrationConfiguration;
 import com.atlassian.bamboo.configuration.AdministrationConfigurationAccessor;
 import com.atlassian.bamboo.utils.EscapeChars;
+import com.atlassian.bamboo.v2.build.BuildContext;
 import com.atlassian.bamboo.variable.CustomVariableContext;
 import com.atlassian.plugin.Plugin;
 import com.atlassian.plugin.PluginAccessor;
+import org.codehaus.plexus.util.FileUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -84,5 +86,10 @@ public class BambooUtils {
             summaryUrl.append("/");
         }
         return summaryUrl.append("browse/").append(EscapeChars.forFormSubmission(fullBuildKey)).toString();
+    }
+
+    public static void DeleteJFrogTempDir(BuildContext buildContext, CustomVariableContext customVariableContext) throws IOException {
+        String fullBuildKey = buildContext.getResultKey().getKey();
+        FileUtils.deleteDirectory(BambooUtils.getJfrogTmpSubdir(customVariableContext, fullBuildKey));
     }
 }

@@ -17,11 +17,19 @@
         <resource type="download" name="icon" location="/images/jfrogLogo.png"/>
     </taskType>
 
-    <postBuildCompletedAction
-            key="PostBuildAction"
-            class="org.jfrog.bamboo.PostBuildAction">
+    <!-- PostBuildActions, clean up temporary JFrog directory -->
+    <!-- buildProcessor is executed on the remote agent to allow access to the directory -->
+    <buildProcessor
+            key="AgentPostBuildAction"
+            class="org.jfrog.bamboo.AgentPostBuildAction">
         <description>Cleans up the temporary JFrog directory when the build is completed</description>
-    </postBuildCompletedAction>
+    </buildProcessor>
+    <!-- buildProcessorServer is executed on the server side to allow access to the directory -->
+    <buildProcessorServer
+        key="ServerPostBuildAction"
+        class="org.jfrog.bamboo.ServerPostBuildAction">
+        <description>Cleans up the temporary JFrog directory when the build is completed</description>
+    </buildProcessorServer>
 
     <!-- Admin Configurations -->
     <component name="JFrog Server Configuration Management Component" key="jfrogServerConfigManager"
