@@ -1,21 +1,20 @@
 package org.jfrog.bamboo;
 
-import com.atlassian.bamboo.build.CustomBuildProcessorServer;
+import com.atlassian.bamboo.build.CustomBuildProcessor;
 import com.atlassian.bamboo.v2.build.BuildContext;
 import com.atlassian.bamboo.variable.CustomVariableContext;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.codehaus.plexus.util.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jfrog.bamboo.utils.BambooUtils;
 
 import java.io.IOException;
 
 /**
- * Post-build action that deletes the Bamboo temp directory.
- * Implements CustomBuildProcessorServer to run on the server
- * To make sure we have permissions and access to the temp folder we created.
+ * Post-build action that deletes the temporary JFrog build directory,
+ * executed on the agent side (remote or local) to make sure we have
+ * access to the temp folder we created.
  */
-public class ServerPostBuildAction implements CustomBuildProcessorServer {
+public class AgentBuildProcessor implements CustomBuildProcessor {
     private BuildContext buildContext;
     private CustomVariableContext customVariableContext;
 
@@ -37,7 +36,8 @@ public class ServerPostBuildAction implements CustomBuildProcessorServer {
      */
     @Override
     public @NotNull BuildContext call() throws IOException {
-        BambooUtils.DeleteJFrogTempDir(this.buildContext, this.customVariableContext);
+        String fullBuildKey = buildContext.getResultKey().getKey();
+        FileUtils.deleteDirectory(BambooUtils.getJfrogTmpSubdir(customVariableContext, fullBuildKey));
         return buildContext;
     }
 

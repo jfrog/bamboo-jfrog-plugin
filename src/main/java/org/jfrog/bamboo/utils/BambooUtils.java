@@ -87,9 +87,4 @@ public class BambooUtils {
         }
         return summaryUrl.append("browse/").append(EscapeChars.forFormSubmission(fullBuildKey)).toString();
     }
-
-    public static void DeleteJFrogTempDir(BuildContext buildContext, CustomVariableContext customVariableContext) throws IOException {
-        String fullBuildKey = buildContext.getResultKey().getKey();
-        FileUtils.deleteDirectory(BambooUtils.getJfrogTmpSubdir(customVariableContext, fullBuildKey));
-    }
 }
