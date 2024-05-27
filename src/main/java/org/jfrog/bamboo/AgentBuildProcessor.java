@@ -36,6 +36,7 @@ public class AgentBuildProcessor implements CustomBuildProcessor {
      */
     @Override
     public @NotNull BuildContext call() throws IOException {
+        // Delete Bamboo temp directory
         String fullBuildKey = buildContext.getResultKey().getKey();
         FileUtils.deleteDirectory(BambooUtils.getJfrogTmpSubdir(customVariableContext, fullBuildKey));
         return buildContext;
