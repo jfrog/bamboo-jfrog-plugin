@@ -1,6 +1,6 @@
 package org.jfrog.bamboo;
 
-import com.atlassian.bamboo.build.CustomPostBuildCompletedAction;
+import com.atlassian.bamboo.build.CustomBuildProcessor;
 import com.atlassian.bamboo.v2.build.BuildContext;
 import com.atlassian.bamboo.variable.CustomVariableContext;
 import org.codehaus.plexus.util.FileUtils;
@@ -9,7 +9,12 @@ import org.jfrog.bamboo.utils.BambooUtils;
 
 import java.io.IOException;
 
-public class PostBuildAction implements CustomPostBuildCompletedAction {
+/**
+ * Post-build action that deletes the temporary JFrog build directory,
+ * executed on the agent side (remote or local) to make sure we have
+ * access to the temp folder we created.
+ */
+public class AgentBuildProcessor implements CustomBuildProcessor {
     private BuildContext buildContext;
     private CustomVariableContext customVariableContext;
 

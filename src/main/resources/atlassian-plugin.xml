@@ -17,11 +17,12 @@
         <resource type="download" name="icon" location="/images/jfrogLogo.png"/>
     </taskType>
 
-    <postBuildCompletedAction
-            key="PostBuildAction"
-            class="org.jfrog.bamboo.PostBuildAction">
+    <!-- buildProcessor Occurs on the Agent (both local and remote) after the builder has run. -->
+    <buildProcessor
+            key="AgentPostBuildAction"
+            class="org.jfrog.bamboo.AgentBuildProcessor">
         <description>Cleans up the temporary JFrog directory when the build is completed</description>
-    </postBuildCompletedAction>
+    </buildProcessor>
 
     <!-- Admin Configurations -->
     <component name="JFrog Server Configuration Management Component" key="jfrogServerConfigManager"
