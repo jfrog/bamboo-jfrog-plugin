@@ -142,6 +142,8 @@ public class JfTask extends JfContext implements TaskType {
                 return "";
             }
         };
+        jfEnvs = System.getenv();
+
         jfEnvs.put("JFROG_CLI_SERVER_ID", serverConfig.getServerId());
         jfEnvs.put("JFROG_CLI_BUILD_NAME", buildContext.getPlanName());
         jfEnvs.put("JFROG_CLI_BUILD_NUMBER", String.valueOf(buildContext.getBuildNumber()));
