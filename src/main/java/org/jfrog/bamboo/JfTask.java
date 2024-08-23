@@ -145,9 +145,12 @@ public class JfTask extends JfContext implements TaskType {
             }
         };
 
+        // getEffectiveVariables - This method returns the set of variables that are effective for the current build,
+        // taking into account any overrides or changes made during the build process.
         for (VariableDefinitionContext varContext : buildContext.getVariableContext().getEffectiveVariables().values()) {
             jfEnvs.put(varContext.getKey(), varContext.getValue());
         }
+
         jfEnvs.put("JFROG_CLI_SERVER_ID", serverConfig.getServerId());
         jfEnvs.put("JFROG_CLI_BUILD_NAME", buildContext.getPlanName());
         jfEnvs.put("JFROG_CLI_BUILD_NUMBER", String.valueOf(buildContext.getBuildNumber()));
