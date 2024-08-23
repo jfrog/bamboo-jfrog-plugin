@@ -9,6 +9,7 @@ import com.atlassian.bamboo.task.TaskResultBuilder;
 import com.atlassian.bamboo.task.TaskType;
 import com.atlassian.bamboo.v2.build.BuildContext;
 import com.atlassian.bamboo.variable.CustomVariableContext;
+import com.atlassian.bamboo.variable.VariableDefinitionContext;
 import com.atlassian.plugin.PluginAccessor;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -135,6 +136,7 @@ public class JfTask extends JfContext implements TaskType {
      */
     public Map<String, String> createJfrogEnvironmentVariables(BuildContext buildContext, ServerConfig serverConfig) throws IOException {
         Map<String, String> jfEnvs = new HashMap<>() {
+            @Override
             public String put(String key, String value) {
                 if (StringUtils.isBlank(System.getProperty(key))) {
                     return super.put(key, value);
@@ -142,8 +144,10 @@ public class JfTask extends JfContext implements TaskType {
                 return "";
             }
         };
-        jfEnvs = System.getenv();
 
+        for (VariableDefinitionContext varContext : buildContext.getVariableContext().getEffectiveVariables().values()) {
+            jfEnvs.put(varContext.getKey(), varContext.getValue());
+        }
         jfEnvs.put("JFROG_CLI_SERVER_ID", serverConfig.getServerId());
         jfEnvs.put("JFROG_CLI_BUILD_NAME", buildContext.getPlanName());
         jfEnvs.put("JFROG_CLI_BUILD_NUMBER", String.valueOf(buildContext.getBuildNumber()));
