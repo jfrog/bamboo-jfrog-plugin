@@ -86,7 +86,7 @@ public class JfTaskUnitTest2 {
         // Verify task result and interactions with dependencies
         assertEquals(TaskResultBuilder.newBuilder(taskContext).success().build(), taskResult);
         //verify(buildLog).info("The following environment variables will be used: " + envs);
-        verify(IServerConfigManager).getAllServerConfigs();
+        verify(serverConfigManager).getAllServerConfigs();
         //      verify(jfTask).createJfrogEnvironmentVariables(any(), eq("server1"));
         verify(jfTask).getWorkingDirectory(eq("/path/to/working/dir"), any());
         //  verify(jfTask).runJFrogCliConfigAddCommand(serverConfig);
