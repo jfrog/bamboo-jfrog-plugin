@@ -41,7 +41,7 @@ public class JfTaskUnitTest2 {
     private BuildLogger buildLog;
 
     @Mock
-    private ServerConfigManager IServerConfigManager;
+    private ServerConfigManager serverConfigManager;
 
     @Mock
     private ExecutableRunner commandRunner;
