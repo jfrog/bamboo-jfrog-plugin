@@ -41,7 +41,7 @@ public class JfTaskUnitTest2 {
     private BuildLogger buildLog;
 
     @Mock
-    private ServerConfigManager serverConfigManager;
+    private ServerConfigManager IServerConfigManager;
 
     @Mock
     private ExecutableRunner commandRunner;
@@ -55,7 +55,6 @@ public class JfTaskUnitTest2 {
         jfTask = new JfTask();
         jfTask.setCustomVariableContext(null); // Set customVariableContext if needed
         jfTask.setPluginAccessor(null); // Set pluginAccessor if needed
-        jfTask.setAdministrationConfiguration(null); // Set administrationConfiguration if needed
         jfTask.setAdministrationConfigurationAccessor(null); // Set administrationConfigurationAccessor if needed
     }
 
@@ -87,7 +86,7 @@ public class JfTaskUnitTest2 {
         // Verify task result and interactions with dependencies
         assertEquals(TaskResultBuilder.newBuilder(taskContext).success().build(), taskResult);
         //verify(buildLog).info("The following environment variables will be used: " + envs);
-        verify(serverConfigManager).getAllServerConfigs();
+        verify(IServerConfigManager).getAllServerConfigs();
         //      verify(jfTask).createJfrogEnvironmentVariables(any(), eq("server1"));
         verify(jfTask).getWorkingDirectory(eq("/path/to/working/dir"), any());
         //  verify(jfTask).runJFrogCliConfigAddCommand(serverConfig);

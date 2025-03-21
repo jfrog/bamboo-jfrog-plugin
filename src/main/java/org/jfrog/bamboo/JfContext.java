@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jfrog.bamboo.config.ServerConfigManager;
 
+import javax.inject.Inject;
 import java.util.Map;
 
 /**
@@ -19,11 +20,14 @@ public class JfContext extends AbstractTaskConfigurator {
     public static final String JF_TASK_COMMAND = "jf.task.command";
     public static final String JF_TASK_WORKING_DIRECTORY = "jf.task.working.directory";
 
+    @Inject
+    private ServerConfigManager serverConfigManager;
+
     @Override
     public void populateContextForCreate(@NotNull Map<String, Object> context) {
         super.populateContextForCreate(context);
         context.put(JF_TASK_COMMAND, "jf ");
-        context.put("serverConfigManager", ServerConfigManager.getInstance());
+        context.put("serverConfigManager", serverConfigManager);
         context.put("selectedServerId", 1);
     }
 
@@ -34,7 +38,7 @@ public class JfContext extends AbstractTaskConfigurator {
         context.put(JF_TASK_SERVER_ID, config.get(JF_TASK_SERVER_ID));
         context.put(JF_TASK_COMMAND, config.get(JF_TASK_COMMAND));
         context.put(JF_TASK_WORKING_DIRECTORY, config.get(JF_TASK_WORKING_DIRECTORY));
-        context.put("serverConfigManager", ServerConfigManager.getInstance());
+        context.put("serverConfigManager", serverConfigManager);
     }
 
     @Override

@@ -52,7 +52,7 @@ public class JfTaskUnitTest {
 
         PluginAccessor pluginAccessor = Mockito.mock(PluginAccessor.class);
         jfTask.setPluginAccessor(pluginAccessor);
-
+        jfTask.setServerConfigManager(serverConfigManager);
         jfTask.execute(context);
     }
 

@@ -176,14 +176,18 @@
                 <configuration>
                     <productVersion>${bamboo.version}</productVersion>
                     <productDataVersion>${bamboo.data.version}</productDataVersion>
-                    <enableQuickReload>true</enableQuickReload>
-                    <extractDependencies>false</extractDependencies>
                     <instructions>
                         <Atlassian-Plugin-Key>${atlassian.plugin.key}</Atlassian-Plugin-Key>
+                        <Bundle-SymbolicName>${atlassian.plugin.key}</Bundle-SymbolicName>
+                        <Spring-Context>*</Spring-Context>
+                        <Export-Package>
+                        </Export-Package>
                         <Import-Packages>
                             !com.opensymphony.*,
+                            !org.objectweb.asm.*,
                             *;resolution:="optional",
                         </Import-Packages>
+                        <skipManifestValidation>true</skipManifestValidation>
                     </instructions>
                 </configuration>
             </plugin>
