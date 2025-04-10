@@ -20,12 +20,13 @@ import com.atlassian.bamboo.security.GlobalApplicationSecureObject;
 import com.atlassian.bamboo.ww2.actions.admin.user.AbstractEntityPagerSupport;
 import com.atlassian.bamboo.ww2.aware.permissions.GlobalAdminSecurityAware;
 
+import javax.inject.Inject;
 import java.util.List;
 
 public class ExistingServersListAction extends AbstractEntityPagerSupport implements GlobalAdminSecurityAware {
-
     private final ServerConfigManager serverConfigManager;
 
+    @Inject
     public ExistingServersListAction(ServerConfigManager serverConfigManager) {
         this.serverConfigManager = serverConfigManager;
     }

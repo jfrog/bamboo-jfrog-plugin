@@ -1,6 +1,5 @@
 package org.jfrog.bamboo;
 
-import com.atlassian.bamboo.configuration.AdministrationConfiguration;
 import com.atlassian.bamboo.configuration.AdministrationConfigurationAccessor;
 import com.atlassian.bamboo.configuration.ConfigurationMap;
 import com.atlassian.bamboo.task.TaskContext;
@@ -11,16 +10,19 @@ import com.atlassian.bamboo.v2.build.BuildContext;
 import com.atlassian.bamboo.variable.CustomVariableContext;
 import com.atlassian.bamboo.variable.VariableDefinitionContext;
 import com.atlassian.plugin.PluginAccessor;
+import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jfrog.bamboo.config.ServerConfig;
 import org.jfrog.bamboo.config.ServerConfigManager;
+import org.jfrog.bamboo.config.ServerConfig;
+import org.jfrog.bamboo.config.ServerConfigManagerImpl;
 import org.jfrog.bamboo.utils.BambooUtils;
 import org.jfrog.bamboo.utils.BuildLog;
 import org.jfrog.bamboo.utils.ExecutableRunner;
 import org.jfrog.bamboo.utils.Utils;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -36,11 +38,18 @@ import java.util.stream.Collectors;
  */
 public class JfTask extends JfContext implements TaskType {
     private BuildLog buildLog;
+    @Inject
     private ServerConfigManager serverConfigManager;
     private ExecutableRunner commandRunner;
+    @Inject
+    @ComponentImport
     private CustomVariableContext customVariableContext;
+    @Inject
+    @ComponentImport
     private PluginAccessor pluginAccessor;
-    private AdministrationConfiguration administrationConfiguration;
+
+    @Inject
+    @ComponentImport
     private AdministrationConfigurationAccessor administrationConfigurationAccessor;
 
     /**
@@ -52,7 +61,7 @@ public class JfTask extends JfContext implements TaskType {
     @Override
     public @NotNull TaskResult execute(final @NotNull TaskContext taskContext) {
         buildLog = new BuildLog(taskContext.getBuildLogger());
-        serverConfigManager = ServerConfigManager.getInstance();
+        serverConfigManager = serverConfigManager;
         ConfigurationMap confMap = taskContext.getConfigurationMap();
         TaskResultBuilder resultBuilder = TaskResultBuilder.newBuilder(taskContext);
         ServerConfig selectedServerConfig = serverConfigManager.getServerConfigById(confMap.get(JF_TASK_SERVER_ID));
@@ -167,7 +176,7 @@ public class JfTask extends JfContext implements TaskType {
             jfEnvs.put("JFROG_CLI_RELEASES_REPO", serverConfig.getServerId() + "/" + serverConfig.getCliRepository());
         }
 
-        String buildUrl = BambooUtils.createBambooBuildUrl(fullBuildKey, administrationConfiguration, administrationConfigurationAccessor);
+        String buildUrl = BambooUtils.createBambooBuildUrl(fullBuildKey, administrationConfigurationAccessor.getAdministrationConfiguration(), administrationConfigurationAccessor);
         jfEnvs.put("JFROG_CLI_BUILD_URL", buildUrl);
 
         jfEnvs.put("JFROG_CLI_USER_AGENT", BambooUtils.getJFrogPluginIdentifier(pluginAccessor));
@@ -242,15 +251,6 @@ public class JfTask extends JfContext implements TaskType {
         this.pluginAccessor = pluginAccessor;
     }
 
-    /**
-     * Sets the administration configuration.
-     *
-     * @param administrationConfiguration The administration configuration.
-     */
-    @SuppressWarnings("unused")
-    public void setAdministrationConfiguration(AdministrationConfiguration administrationConfiguration) {
-        this.administrationConfiguration = administrationConfiguration;
-    }
 
     /**
      * Sets the administration configuration accessor.
@@ -261,5 +261,9 @@ public class JfTask extends JfContext implements TaskType {
     public void setAdministrationConfigurationAccessor(
             AdministrationConfigurationAccessor administrationConfigurationAccessor) {
         this.administrationConfigurationAccessor = administrationConfigurationAccessor;
+    }
+
+    public void setServerConfigManager(ServerConfigManager serverConfigManager) {
+        this.serverConfigManager = serverConfigManager;
     }
 }

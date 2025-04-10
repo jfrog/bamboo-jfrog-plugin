@@ -24,13 +24,9 @@
         <description>Cleans up the temporary JFrog directory when the build is completed</description>
     </buildProcessor>
 
-    <!-- Admin Configurations -->
-    <component name="JFrog Server Configuration Management Component" key="jfrogServerConfigManager"
-               class="org.jfrog.bamboo.config.ServerConfigManager"/>
-
     <web-item key="configureJfrogPlugin" name="JFrog Configuration" section="system.admin/plugins">
         <label key="JFrog Configuration"/>
-        <link linkId="configureJfrogPlugin">/templates/jfrogConfiguration.action</link>
+        <link linkId="configureJfrogPlugin">/admin/jfrogConfiguration.action</link>
     </web-item>
 
     <xwork key="jfrogConfigAdmin" name="JFrog Configuration">

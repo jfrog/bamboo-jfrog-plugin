@@ -55,7 +55,6 @@ public class JfTaskUnitTest2 {
         jfTask = new JfTask();
         jfTask.setCustomVariableContext(null); // Set customVariableContext if needed
         jfTask.setPluginAccessor(null); // Set pluginAccessor if needed
-        jfTask.setAdministrationConfiguration(null); // Set administrationConfiguration if needed
         jfTask.setAdministrationConfigurationAccessor(null); // Set administrationConfigurationAccessor if needed
     }
 
