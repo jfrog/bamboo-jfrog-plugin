@@ -61,7 +61,6 @@ public class JfTask extends JfContext implements TaskType {
     @Override
     public @NotNull TaskResult execute(final @NotNull TaskContext taskContext) {
         buildLog = new BuildLog(taskContext.getBuildLogger());
-        serverConfigManager = serverConfigManager;
         ConfigurationMap confMap = taskContext.getConfigurationMap();
         TaskResultBuilder resultBuilder = TaskResultBuilder.newBuilder(taskContext);
         ServerConfig selectedServerConfig = serverConfigManager.getServerConfigById(confMap.get(JF_TASK_SERVER_ID));

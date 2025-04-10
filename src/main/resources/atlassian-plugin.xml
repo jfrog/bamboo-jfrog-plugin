@@ -49,7 +49,7 @@
                 <result name="success" type="freemarker">/templates/jfrogServerConfig.ftl</result>
             </action>
 
-            <action name="createJfrogServer" class="org.jfrog.bamboo.config.JfrogServerConfigAction" method="create">
+            <action name="createJfrogServer" class="org.jfrog.bamboo.config.JfrogServerConfigAction" method="doCreate">
                 <result name="input" type="freemarker">/templates/jfrogServerConfig.ftl</result>
                 <result name="success" type="redirect">/admin/jfrogConfiguration.action</result>
                 <result name="error" type="freemarker">/templates/jfrogServerConfig.ftl</result>
