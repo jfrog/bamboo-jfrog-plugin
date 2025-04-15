@@ -1,5 +1,5 @@
 resources:
-  - name: bambooSnapshotGit
+  - name: jfrogBambooSnapshotGit
     type: GitRepo
     configuration:
       path: jfrog/bamboo-jfrog-plugin
@@ -7,7 +7,7 @@ resources:
       branches:
         include: main
 
-  - name: bambooReleaseGit
+  - name: jfrogBambooReleaseGit
     type: GitRepo
     configuration:
       path: jfrog/bamboo-jfrog-plugin
