@@ -1,5 +1,5 @@
 pipelines:
-  - name: release_jfrog_bamboo
+  - name: create_jfrog_bamboo_plugin_snapshot
     configuration:
       runtime:
         type: image
@@ -8,39 +8,28 @@ pipelines:
             language: java
             versions:
               - "11.0.0"
-      environmentVariables:
-        readOnly:
-          NEXT_VERSION: 0.0.0
-          NEXT_DEVELOPMENT_VERSION: 0.0.x-SNAPSHOT
 
     steps:
-      - name: Release
+      - name: Snapshot
         type: Bash
         configuration:
           inputResources:
-            - name: jfrogBambooReleaseGit
+            - name: jfrogBambooSnapshotGit
           integrations:
-            - name: il_automation
             - name: ecosys_entplus_deployer
         execution:
+          onStart:
+            # Save gradle cache
+            - restore_cache_files m2_home ${HOME}/.m2
           onExecute:
-            - cd $res_bambooReleaseGit_resourcePath
+            - cd $res_jfrogBambooSnapshotGit_resourcePath
 
             # Set env
             - export CI=true
             - export JFROG_BUILD_STATUS=PASS
-            - export JFROG_CLI_BUILD_NAME=ecosystem-jfrog-bamboo-plugin-release
+            - export JFROG_CLI_BUILD_NAME=ecosystem-jfrog-bamboo-plugin-dev
             - export JFROG_CLI_BUILD_NUMBER=$run_number
             - export JFROG_CLI_BUILD_PROJECT=ecosys
-
-            # Configure git
-            - git checkout main
-            - git remote set-url origin https://$int_il_automation_token@github.com/jfrog/bamboo-jfrog-plugin.git
-
-            # Make sure versions provided
-            - echo "Checking variables"
-            - test -n "$NEXT_VERSION" -a "$NEXT_VERSION" != "0.0.0"
-            - test -n "$NEXT_DEVELOPMENT_VERSION" -a "$NEXT_DEVELOPMENT_VERSION" != "0.0.0"
 
             # Configure JFrog CLI
             - curl -fL https://install-cli.jfrog.io | sh && chmod +x ./jf
@@ -48,11 +37,11 @@ pipelines:
             - ./jf c add internal --url=$int_ecosys_entplus_deployer_url --user=$int_ecosys_entplus_deployer_user --password=$int_ecosys_entplus_deployer_apikey
             - ./jf mvnc --repo-resolve-releases ecosys-bamboo-repos --repo-resolve-snapshots ecosys-releases-snapshots --repo-deploy-snapshots ecosys-oss-snapshot-local --repo-deploy-releases ecosys-oss-release-local
 
+            # Run audit
+            - ./jf audit
 
-            # Update version
-            - env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME ./jf mvn versions:set -DnewVersion="${NEXT_VERSION}" -B
-            - git commit -am "[artifactory-release] Release version ${NEXT_VERSION} [skipRun]" --allow-empty
-            - git tag ${NEXT_VERSION}
+            # Delete former snapshots to make sure the release bundle will not contain the same artifacts
+            - ./jf rt del "ecosys-oss-snapshot-local/org/jfrog/bamboo/bamboo-jfrog-plugin/*" --quiet
 
             # Run install and publish
             - >
@@ -60,23 +49,17 @@ pipelines:
               JFROG_CLI_BUILD_NAME=$JFROG_CLI_BUILD_NAME
               JFROG_CLI_BUILD_NUMBER=$JFROG_CLI_BUILD_NUMBER
               JFROG_CLI_BUILD_PROJECT=$JFROG_CLI_BUILD_PROJECT
-              ./jf mvn clean install -U -B
+              ./jf mvn clean install -U -B javadoc:jar source:jar
             - ./jf rt bag && ./jf rt bce
             - ./jf rt bp
 
             # Distribute release bundle
-            - ./jf ds rbc ecosystem-jfrog-bamboo-plugin $NEXT_VERSION --spec=./ci/release/specs/prod-rbc-filespec.json --spec-vars="version=$NEXT_VERSION" --sign
-            - ./jf ds rbd ecosystem-jfrog-bamboo-plugin $NEXT_VERSION --site="releases.jfrog.io" --sync
-
-            # Update next development version
-            - env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME ./jf mvn versions:set -DnewVersion=$NEXT_DEVELOPMENT_VERSION -B
-
-            # Commit all changes to master
-            - git clean -fd
-            - git commit -am "[artifactory-release] Next development version [skipRun]"
-            - git push
-            - git push --tags
+            - ./jf ds rbc ecosystem-jfrog-bamboo-plugin-snapshot $run_number --spec=./ci/release/specs/dev-rbc-filespec.json --sign
+            - ./jf ds rbd ecosystem-jfrog-bamboo-plugin-snapshot $run_number --site="releases.jfrog.io" --sync
 
           onComplete:
             # Show tests in the *Tests* tab
-            - save_tests $res_bambooReleaseGit_resourcePath/target/surefire-reports/
+            - save_tests $res_jfrogBambooSnapshotGit_resourcePath/target/surefire-reports/
+
+            # Save .m2 cache
+            - add_cache_files ${HOME}/.m2 m2_home
