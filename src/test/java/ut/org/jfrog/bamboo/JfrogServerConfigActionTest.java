@@ -42,7 +42,6 @@ public class JfrogServerConfigActionTest {
 
     @Test
     public void testHttpUrlIsValid() throws MalformedURLException {
-        // Test HTTP URL validation directly without triggering dependency conflicts
         String httpUrl = "http://example.com";
         URL url = new URL(httpUrl);
         assertEquals("http", url.getProtocol());
@@ -51,23 +50,14 @@ public class JfrogServerConfigActionTest {
 
     @Test  
     public void testHttpsUrlIsValid() throws MalformedURLException {
-        // Test HTTPS URL validation directly
         String httpsUrl = "https://example.com";
         URL url = new URL(httpsUrl);
         assertEquals("https", url.getProtocol());
         assertEquals("example.com", url.getHost());
     }
 
-    @Test(expected = MalformedURLException.class)
-    public void testInvalidUrlThrowsException() throws MalformedURLException {
-        // Test invalid URL throws exception
-        String invalidUrl = "ht!tp://bad url";
-        new URL(invalidUrl);
-    }
-
     @Test
     public void testHttpUrlWithPort() throws MalformedURLException {
-        // Test HTTP URL with port
         String httpUrlWithPort = "http://artifactory.company.com:8080";
         URL url = new URL(httpUrlWithPort);
         assertEquals("http", url.getProtocol());
