@@ -64,6 +64,56 @@ public class JfrogServerConfigActionTest {
         assertEquals("artifactory.company.com", url.getHost());
         assertEquals(8080, url.getPort());
     }
+
+    @Test
+    public void validate_shouldAddError_whenUrlIsMalformed() {
+        action.setServerId("testServer");
+        action.setUrl("invalid-url-format");
+
+        action.validate();
+
+        assertTrue("Expected field error on url", action.hasFieldErrors());
+        assertNotNull("Expected url field error", action.getFieldErrors().get("url"));
+        assertTrue("Expected MalformedURL error message", 
+            action.getFieldErrors().get("url").get(0).contains("Please specify a valid URL"));
+    }
+
+    @Test
+    public void validate_shouldAddError_whenUrlHasInvalidProtocol() {
+        action.setServerId("testServer");
+        action.setUrl("ftp://example.com");
+
+        action.validate();
+
+        assertTrue("Expected field error on url", action.hasFieldErrors());
+        assertNotNull("Expected url field error", action.getFieldErrors().get("url"));
+        assertTrue("Expected protocol error message", 
+            action.getFieldErrors().get("url").get(0).contains("URL should start with 'https://' or 'http://'"));
+    }
+
+    @Test
+    public void validate_shouldAddError_whenUrlIsJustProtocol() {
+        action.setServerId("testServer");
+        action.setUrl("https://");
+
+        action.validate();
+
+        assertTrue("Expected field error on url", action.hasFieldErrors());
+        assertNotNull("Expected url field error", action.getFieldErrors().get("url"));
+        assertTrue("Expected MalformedURL error message", 
+            action.getFieldErrors().get("url").get(0).contains("Please specify a valid URL"));
+    }
+
+    @Test
+    public void validate_shouldAddError_whenUrlIsNull() {
+        action.setServerId("testServer");
+        action.setUrl(null);
+
+        action.validate();
+
+        assertTrue("Expected field error on url", action.hasFieldErrors());
+        assertNotNull("Expected url field error", action.getFieldErrors().get("url"));
+        assertTrue("Expected empty URL error message", 
+            action.getFieldErrors().get("url").get(0).contains("Please specify a URL of a JFrog Platform"));
+    }
 }
-
-
