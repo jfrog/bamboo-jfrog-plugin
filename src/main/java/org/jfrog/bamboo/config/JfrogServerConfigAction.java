@@ -66,9 +66,10 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
 
         if (StringUtils.isBlank(url)) {
             addFieldError("url", "Please specify a URL of a JFrog Platform.");
-        } else if (!StringUtils.startsWithIgnoreCase(url, "https://")) {
-            addFieldError("url", "URL should start with 'https://'");
-        } else {
+        } 
+        else if (!StringUtils.startsWithIgnoreCase(url, "https://") && !StringUtils.startsWithIgnoreCase(url, "http://")) {
+            addFieldError("url", "URL should start with 'https://' or 'http://'");
+        }else {
             try {
                 new URL(url);
             } catch (MalformedURLException mue) {
