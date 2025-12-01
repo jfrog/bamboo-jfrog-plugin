@@ -79,7 +79,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
         try {
             persist();
         } catch (IllegalAccessException | UnsupportedEncodingException | JsonProcessingException e) {
-            log.error("Could not add JFrog configuration: Configuration persistence failed", e);
+            log.error("Could not add JFrog configuration: Configuration persistence failed");
         }
     }
 
@@ -144,7 +144,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
                 }
             }
         } catch (IOException e) {
-            log.error("Could not load JFrog configuration: Configuration file access failed", e);
+            log.error("Could not load JFrog configuration: Configuration file access failed");
         }
     }
 
