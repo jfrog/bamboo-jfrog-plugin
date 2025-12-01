@@ -56,7 +56,9 @@ public class BuildLog implements org.jfrog.build.api.util.Log {
     public void error(String message, Throwable throwable) {
         String prefixedMessage = addPrefix(message);
         if (buildLogger != null) {
-            buildLogger.addErrorLogEntry(addPrefix(message), throwable);
+            // Sanitize error message to avoid exposing internal structure
+            String sanitizedMessage = throwable != null ? "An error occurred during execution" : prefixedMessage;
+            buildLogger.addErrorLogEntry(sanitizedMessage);
         }
         log.error(prefixedMessage, throwable);
     }

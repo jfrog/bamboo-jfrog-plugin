@@ -69,11 +69,15 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
         } 
         else if (!StringUtils.startsWithIgnoreCase(url, "https://") && !StringUtils.startsWithIgnoreCase(url, "http://")) {
             addFieldError("url", "URL should start with 'https://' or 'http://'");
-        }else {
+        } else if (StringUtils.startsWithIgnoreCase(url, "http://")) {
+            addActionMessage("Warning: Using HTTP connection. HTTPS is recommended for secure communication.");
+        }
+        
+        if (StringUtils.startsWithIgnoreCase(url, "https://") || StringUtils.startsWithIgnoreCase(url, "http://")) {
             try {
                 new URL(url);
             } catch (MalformedURLException mue) {
-                addFieldError("url", "Please specify a valid URL of a JFrog Platform. " + ExceptionUtils.getRootCauseMessage(mue));
+                addFieldError("url", "Please specify a valid URL of a JFrog Platform. Invalid URL format provided.");
             }
         }
 
@@ -157,8 +161,8 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
             }
             addActionMessage("Connection successful! JFrog Artifactory version: " + rtVersion);
         } catch (Exception e) {
-            addActionError("Connection failed: " + ExceptionUtils.getRootCauseMessage(e));
-            log.error("Error while testing the connection to Artifactory server " + url, e);
+            addActionError("Connection failed: Unable to connect to JFrog Platform");
+            log.error("Error while testing the connection to Artifactory server", e);
         }
     }
 
