@@ -33,12 +33,12 @@ jobs:
         uses: jfrog/setup-jfrog-cli@v4
         env:
           JF_URL: ${{ secrets.JF_URL }}
-          JF_ACCESS_TOKEN: ${{ secrets.ARTIFACTORY_ACCESS_TOKEN }}
+          JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
 
       - name: Configure JFrog CLI
         run: |
           # Configure JFrog CLI with server details
-          jf config add --url="${{ secrets.JF_URL }}" --access-token="${{ secrets.ARTIFACTORY_ACCESS_TOKEN }}" --interactive=false --overwrite
+          jf config add --url="${{ secrets.JF_URL }}" --access-token="${{ secrets.JF_ACCESS_TOKEN }}" --interactive=false --overwrite
           jf config use
 
       - name: Run JFrog Audit

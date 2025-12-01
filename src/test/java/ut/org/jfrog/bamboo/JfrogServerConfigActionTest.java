@@ -94,7 +94,7 @@ public class JfrogServerConfigActionTest {
     @Test
     public void validate_shouldAddError_whenUrlIsJustProtocol() {
         action.setServerId("testServer");
-        action.setUrl("https://");
+        action.setUrl("https://[invalid-host");
 
         action.validate();
 
