@@ -74,8 +74,8 @@ public class JfrogServerConfigActionTest {
 
         assertTrue("Expected field error on url", action.hasFieldErrors());
         assertNotNull("Expected url field error", action.getFieldErrors().get("url"));
-        assertTrue("Expected MalformedURL error message", 
-            action.getFieldErrors().get("url").get(0).contains("Please specify a valid URL"));
+        assertTrue("Expected protocol error message", 
+            action.getFieldErrors().get("url").get(0).contains("URL should start with 'https://' or 'http://'"));
     }
 
     @Test
@@ -94,14 +94,14 @@ public class JfrogServerConfigActionTest {
     @Test
     public void validate_shouldAddError_whenUrlIsJustProtocol() {
         action.setServerId("testServer");
-        action.setUrl("https://");
+        action.setUrl("https://[invalid-host");
 
         action.validate();
 
         assertTrue("Expected field error on url", action.hasFieldErrors());
         assertNotNull("Expected url field error", action.getFieldErrors().get("url"));
         assertTrue("Expected MalformedURL error message", 
-            action.getFieldErrors().get("url").get(0).contains("Please specify a valid URL"));
+            action.getFieldErrors().get("url").get(0).contains("Invalid URL format provided"));
     }
 
     @Test
