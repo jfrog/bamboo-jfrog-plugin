@@ -44,6 +44,16 @@
         <buildinfo.version>2.41.22</buildinfo.version>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>net.sf.ehcache</groupId>
+                <artifactId>ehcache</artifactId>
+                <version>2.10.9.2</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <profiles>
         <profile>
             <activation>
@@ -59,6 +69,11 @@
                 <repository>
                     <id>atlassian-public</id>
                     <url>https://maven.atlassian.com/repository/public</url>
+                </repository>
+                <repository>
+                    <id>maven_central</id>
+                    <name>Maven Central</name>
+                    <url>https://repo.maven.apache.org/maven2/</url>
                 </repository>
             </repositories>
             <pluginRepositories>
