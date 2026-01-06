@@ -1,5 +1,5 @@
 <title>[@ww.text name="jfrogServer.delete" /]</title>
-[@ww.form action="deleteServer" namespace="/admin"
+[@ww.form action="deleteServer" namespace="/admin/jfrog"
 submitLabelKey="global.buttons.delete"
 id="confirmDelete"]
     [@s.hidden name="returnUrl" /]
