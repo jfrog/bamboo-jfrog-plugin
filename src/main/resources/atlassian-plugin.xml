@@ -5,8 +5,8 @@
         <vendor name="JFrog" url="https://www.jfrog.com"/>
         <param name="plugin-icon">images/jfrogLogo.png</param>
         <param name="plugin-logo">images/jfrogLogo.png</param>
-        <param name="configure.url">/admin/jfrogConfiguration.action</param>
-        <param name="post.install.url">/admin/jfrogConfiguration.action</param>
+        <param name="configure.url">/admin/jfrog/jfrogConfiguration.action</param>
+        <param name="post.install.url">/admin/jfrog/jfrogConfiguration.action</param>
     </plugin-info>
 
     <taskType key="JfTask" name="JFrog CLI Task" class="org.jfrog.bamboo.JfTask">
@@ -26,11 +26,11 @@
 
     <web-item key="configureJfrogPlugin" name="JFrog Configuration" section="system.admin/plugins">
         <label key="JFrog Configuration"/>
-        <link linkId="configureJfrogPlugin">/admin/jfrogConfiguration.action</link>
+        <link linkId="configureJfrogPlugin">/admin/jfrog/jfrogConfiguration.action</link>
     </web-item>
 
     <xwork key="jfrogConfigAdmin" name="JFrog Configuration">
-        <package name="configureJfrogPlugin" extends="admin">
+        <package name="configureJfrogPlugin" extends="admin" namespace="/admin/jfrog">
 
             <!-- Main container -->
             <action name="jfrogConfiguration" class="org.jfrog.bamboo.config.JfrogConfigurationAction">
@@ -51,7 +51,7 @@
 
             <action name="createJfrogServer" class="org.jfrog.bamboo.config.JfrogServerConfigAction" method="doCreate">
                 <result name="input" type="freemarker">/templates/jfrogServerConfig.ftl</result>
-                <result name="success" type="redirect">/admin/jfrogConfiguration.action</result>
+                <result name="success" type="redirect">/admin/jfrog/jfrogConfiguration.action</result>
                 <result name="error" type="freemarker">/templates/jfrogServerConfig.ftl</result>
                 <param name="mode">add</param>
             </action>
@@ -63,7 +63,7 @@
 
             <action name="updateServer" class="org.jfrog.bamboo.config.JfrogServerConfigAction" method="update">
                 <result name="input" type="freemarker">/templates/jfrogServerConfig.ftl</result>
-                <result name="success" type="redirect">/admin/jfrogConfiguration.action</result>
+                <result name="success" type="redirect">/admin/jfrog/jfrogConfiguration.action</result>
                 <param name="mode">edit</param>
             </action>
 
@@ -74,8 +74,8 @@
 
             <action name="deleteServer" class="org.jfrog.bamboo.config.JfrogServerConfigAction" method="delete">
                 <result name="input" type="redirect">/templates/jfrogServerConfig.ftl</result>
-                <result name="success" type="redirect">/admin/jfrogConfiguration.action</result>
-                <result name="error" type="redirect">/admin/jfrogConfiguration.action</result>
+                <result name="success" type="redirect">/admin/jfrog/jfrogConfiguration.action</result>
+                <result name="error" type="redirect">/admin/jfrog/jfrogConfiguration.action</result>
             </action>
 
         </package>

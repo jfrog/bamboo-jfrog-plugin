@@ -11,9 +11,9 @@
 <body>
 [/#if]
 
-[#assign cancelUri = '/admin/jfrogConfiguration.action' /]
+[#assign cancelUri = '/admin/jfrog/jfrogConfiguration.action' /]
 
-[@ww.form action=targetAction id="myform" title='JFrog Platform Configuration' submitLabelKey='global.buttons.update' cancelUri='/admin/jfrogConfiguration.action' showActionErrors='true']
+[@ww.form action=targetAction id="myform" title='JFrog Platform Configuration' submitLabelKey='global.buttons.update' cancelUri='/admin/jfrog/jfrogConfiguration.action' showActionErrors='true']
     [@ww.param name='buttons']
         [@ww.submit value="Test Connection" name="testConnection" /]
     [/@ww.param]

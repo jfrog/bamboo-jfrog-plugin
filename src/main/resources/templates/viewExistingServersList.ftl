@@ -3,7 +3,7 @@
         <ul class="toolbar-group">
             <li class="toolbar-item">
                 <a class="toolbar-trigger"
-                   href="[@s.url action='jfrogServerConfig' namespace='/admin' /]">
+                   href="[@s.url action='jfrogServerConfig' namespace='/admin/jfrog' /]">
                     [@ww.text name="New JFrog Platform Configuration" /]</a>
             </li>
         </ul>
@@ -38,12 +38,12 @@
                         </td>
                         <td class="operations">
                             <a id="editServer-${serverConfig.serverId}"
-                               href="[@ww.url action='editServer' serverId=serverConfig.serverId/]">
+                               href="[@ww.url action='editServer' namespace='/admin/jfrog' serverId=serverConfig.serverId/]">
                                 Edit
                             </a>
                             |
                             <a id="deleteServer-${serverConfig.serverId}"
-                               href="[@ww.url action='confirmDeleteServer' serverId=serverConfig.serverId returnUrl=currentUrl/]"
+                               href="[@ww.url action='confirmDeleteServer' namespace='/admin/jfrog' serverId=serverConfig.serverId returnUrl=currentUrl/]"
                                class="delete" title="[@ww.text name="Delete JFrog Platform Configuration" /]">
                                 Delete
                             </a>
