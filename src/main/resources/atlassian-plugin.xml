@@ -17,6 +17,19 @@
         <resource type="download" name="icon" location="/images/jfrogLogo.png"/>
     </taskType>
 
+    <!-- Deployment-project variant of JfTask.
+         JfTask implements TaskType only and is therefore invisible in the Deployment Project task
+         picker. This entry implements DeploymentTaskType so the same JFrog CLI Task experience is
+         available when setting up a Deployment Project environment. The configuration UI and FTL
+         template are shared with JfTask via JfContext. -->
+    <taskType key="JfDeploymentTask" name="JFrog CLI Task" class="org.jfrog.bamboo.JfDeploymentTask">
+        <category name="deployment"/>
+        <configuration class="org.jfrog.bamboo.JfDeploymentTask"/>
+        <resource type="freemarker" name="edit" location="/templates/editJfTask.ftl"/>
+        <description>Run JFrog CLI commands from a Bamboo Deployment Project task.</description>
+        <resource type="download" name="icon" location="/images/jfrogLogo.png"/>
+    </taskType>
+
     <!-- buildProcessor Occurs on the Agent (both local and remote) after the builder has run. -->
     <buildProcessor
             key="AgentPostBuildAction"
