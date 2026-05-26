@@ -1,6 +1,5 @@
 package org.jfrog.bamboo;
 
-import com.atlassian.bamboo.configuration.AdministrationConfigurationAccessor;
 import com.atlassian.bamboo.deployments.execution.DeploymentTaskContext;
 import com.atlassian.bamboo.deployments.execution.DeploymentTaskType;
 import com.atlassian.bamboo.task.TaskResult;
@@ -21,9 +20,6 @@ import org.jfrog.bamboo.utils.Utils;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,10 +49,6 @@ public class JfDeploymentTask extends JfContext implements DeploymentTaskType {
     @Inject
     @ComponentImport
     private PluginAccessor pluginAccessor;
-
-    @Inject
-    @ComponentImport
-    private AdministrationConfigurationAccessor administrationConfigurationAccessor;
 
     /**
      * Executes the JFrog CLI command in a Deployment Project environment.
@@ -154,39 +146,6 @@ public class JfDeploymentTask extends JfContext implements DeploymentTaskType {
         return envs;
     }
 
-    /**
-     * Runs {@code jf config add} to register a server in the CLI's temp home directory.
-     */
-    private int runConfigAdd(ExecutableRunner commandRunner, ServerConfig serverConfig)
-            throws IOException, InterruptedException {
-        List<String> args = new ArrayList<>(List.of(
-                "config", "add", serverConfig.getServerId(),
-                "--url=" + serverConfig.getUrl(),
-                "--interactive=false",
-                "--overwrite=true"
-        ));
-        if (StringUtils.isNotBlank(serverConfig.getAccessToken())) {
-            args.add("--access-token=" + serverConfig.getAccessToken());
-        } else if (StringUtils.isNotBlank(serverConfig.getUsername()) && StringUtils.isNotBlank(serverConfig.getPassword())) {
-            args.add("--user=" + serverConfig.getUsername());
-            args.add("--password=" + serverConfig.getPassword());
-        }
-        return commandRunner.run(args);
-    }
-
-    /**
-     * Resolves the working directory, falling back to the task's default if no custom path is set.
-     */
-    private File getWorkingDirectory(String customWd, File defaultWd) throws IOException {
-        if (StringUtils.isBlank(customWd)) {
-            return defaultWd;
-        }
-        if (!Files.exists(Paths.get(customWd))) {
-            throw new IOException("Working directory: '" + customWd + "' does not exist.");
-        }
-        return new File(customWd);
-    }
-
     // Setters for Spring injection and unit-test overrides
 
     @SuppressWarnings("unused")
@@ -202,11 +161,5 @@ public class JfDeploymentTask extends JfContext implements DeploymentTaskType {
     @SuppressWarnings("unused")
     public void setPluginAccessor(PluginAccessor pluginAccessor) {
         this.pluginAccessor = pluginAccessor;
-    }
-
-    @SuppressWarnings("unused")
-    public void setAdministrationConfigurationAccessor(
-            AdministrationConfigurationAccessor administrationConfigurationAccessor) {
-        this.administrationConfigurationAccessor = administrationConfigurationAccessor;
     }
 }

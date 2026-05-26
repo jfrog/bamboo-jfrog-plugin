@@ -24,7 +24,7 @@
          template are shared with JfTask via JfContext. -->
     <taskType key="JfDeploymentTask" name="JFrog CLI Task" class="org.jfrog.bamboo.JfDeploymentTask">
         <category name="deployment"/>
-        <configuration class="org.jfrog.bamboo.JfDeploymentTask"/>
+        <configuration class="org.jfrog.bamboo.JfContext"/>
         <resource type="freemarker" name="edit" location="/templates/editJfTask.ftl"/>
         <description>Run JFrog CLI commands from a Bamboo Deployment Project task.</description>
         <resource type="download" name="icon" location="/images/jfrogLogo.png"/>
