@@ -6,7 +6,6 @@ import com.atlassian.bamboo.task.TaskResult;
 import com.atlassian.bamboo.task.TaskResultBuilder;
 import com.atlassian.bamboo.variable.CustomVariableContext;
 import com.atlassian.plugin.PluginAccessor;
-import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +16,6 @@ import org.jfrog.bamboo.utils.BuildLog;
 import org.jfrog.bamboo.utils.ExecutableRunner;
 import org.jfrog.bamboo.utils.Utils;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -38,16 +36,8 @@ import java.util.stream.Collectors;
 public class JfDeploymentTask extends JfContext implements DeploymentTaskType {
 
     private BuildLog buildLog;
-
-    @Inject
     private ServerConfigManager serverConfigManager;
-
-    @Inject
-    @ComponentImport
     private CustomVariableContext customVariableContext;
-
-    @Inject
-    @ComponentImport
     private PluginAccessor pluginAccessor;
 
     /**
@@ -56,6 +46,9 @@ public class JfDeploymentTask extends JfContext implements DeploymentTaskType {
     @Override
     public @NotNull TaskResult execute(@NotNull DeploymentTaskContext taskContext) {
         buildLog = new BuildLog(taskContext.getBuildLogger());
+        if (serverConfigManager == null) {
+            serverConfigManager = ServerConfigManager.getInstance();
+        }
         TaskResultBuilder resultBuilder = TaskResultBuilder.newBuilder(taskContext);
 
         String selectedServerId = taskContext.getConfigurationMap().get(JF_TASK_SERVER_ID);

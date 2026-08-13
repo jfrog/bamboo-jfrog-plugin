@@ -13,7 +13,6 @@ import org.jfrog.bamboo.utils.BuildLog;
 import org.jfrog.build.client.ArtifactoryVersion;
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 
-import javax.inject.Inject;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -43,7 +42,6 @@ public class JfrogServerConfigAction extends BambooActionSupport implements Glob
     private final ServerConfigManager serverConfigManager;
     private String testConnection;
 
-    @Inject
     public JfrogServerConfigAction(ServerConfigManager serverConfigManager) {
         this.serverConfigManager = serverConfigManager;
         mode = MODE_ADD;
