@@ -19,7 +19,7 @@ import java.nio.file.Paths;
  */
 public class JfInstaller {
     private static final String RELEASE = "[RELEASE]";
-    private static final String DEFAULT_CLI_VERSION = "2.44.0";
+    private static final String DEFAULT_CLI_VERSION = "2.127.0";
     public static final String RELEASES_URL = "https://releases.jfrog.io";
     public static final String BINARY_NAME = "jf";
     private static final String SHA256_FILE_NAME = "sha256";
